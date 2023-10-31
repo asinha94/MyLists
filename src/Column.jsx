@@ -8,9 +8,12 @@ const Container = styled.div`
   border: 1px solid lightgrey;
   border-radius: 2px;
 `;
+
 const Title = styled.h3`
   padding: 8px;
+  font-family: 'Courier New', monospace;
 `;
+
 const TaskList = styled.div`
   padding: 8px;
 `;
@@ -22,10 +25,11 @@ export default class Column extends React.Component {
       <Container>
         <Title>{this.props.column.title}</Title>
         <Droppable droppableId={this.props.column.id}>
-          {provided => (
+          {(provided, snaphshot) => (
             <TaskList
               ref={provided.innerRef}
               {...provided.droppableProps}
+              isDraggingOver={snaphshot.isDraggingOver}
             >
               {this.props.tasks.map((task, index) => <Task key={task.id} task={task} index={index} />)}
               {provided.placeholder}
