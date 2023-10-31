@@ -12,7 +12,6 @@ export default function App() {
   const [data, setData] = useState(initialData)
 
   const onDragEnd = result => {
-    console.log(result);
     const {destination, source, draggableId} = result;
   
     if (!destination) {

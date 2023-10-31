@@ -8,14 +8,20 @@ const Container = styled.div`
   border-radius: 25px;
   padding: 8px;
   margin-bottom: 8px;
-  background-color: ${props => (props.isDragging ? 'lightgreen' : 'white')};
+  background-color: ${props => (props['data-is-dragging'] ? 'lightgreen' : 'white')};
   font-family: 'Courier New', monospace;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 4px 8px 0 rgba(0, 0, 0, 0.19);
+  font-weight: ${props => (props['data-is-hovering'] || props['data-is-dragging'] ? 'bold' : 'normal')};
+  box-shadow: ${props => (props['data-is-hovering'] || props['data-is-dragging']? '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 4px 8px 0 rgba(0, 0, 0, 0.19)' : '0')};
   display: flex;
 `;
 
 
 export default class Task extends React.Component {
+
+  state = {
+    isHovering: false
+  }
+
   render() {
     return (
       <Draggable draggableId={this.props.task.id} index={this.props.index}>
@@ -24,9 +30,12 @@ export default class Task extends React.Component {
             ref={provided.innerRef}
             {...provided.draggableProps}
             {...provided.dragHandleProps}
-            isDragging={snaphshot.isDragging}
+            data-is-dragging={snaphshot.isDragging}
+            data-is-hovering={this.state.isHovering}
+            onMouseOverCapture={() => {this.setState({isHovering: true})}}
+            onMouseOutCapture={() =>  {this.setState({isHovering: false})}}
           >          
-            {this.props.task.content}
+            {this.props.index}. {this.props.task.content}
           </Container>
         )}
       </Draggable>
