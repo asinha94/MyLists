@@ -1,5 +1,5 @@
 import React from 'react';
-import '@atlaskit/css-reset'
+//import '@atlaskit/css-reset'
 import { DragDropContext } from 'react-beautiful-dnd';
 
 import Column from './Column'
