@@ -1,10 +1,15 @@
 import React from 'react';
 import { useState } from 'react';
-//import '@atlaskit/css-reset'
+import styled from 'styled-components'
 import { DragDropContext } from 'react-beautiful-dnd';
 
 import Column from './Column'
 import initialData from './initialData';
+
+
+const Container = styled.div`
+  display: flex;
+`
 
 
 export default function App() {
@@ -36,22 +41,24 @@ export default function App() {
       const newData = {
         ...data,
         columns: {
-          ...columns,
+          ...data.columns,
           [newColumn.id]: newColumn
         }
       }
-
+      console.log(newData);
       setData(newData);
   
   }
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      {data.columnOrder.map(columnID => {
-        const column = data.columns[columnID];
-        const tasks = column.taskIds.map(taskId => data.tasks[taskId]);
-        return <Column key={column.id} column={column} tasks={tasks} />;
-      })}
+      <Container>
+        {data.columnOrder.map(columnID => {
+          const column = data.columns[columnID];
+          const tasks = column.taskIds.map(taskId => data.tasks[taskId]);
+          return <Column key={column.id} column={column} tasks={tasks} />;
+        })}
+      </Container>
     </DragDropContext>
   );
 }

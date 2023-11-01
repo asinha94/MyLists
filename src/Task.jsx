@@ -10,8 +10,8 @@ const Container = styled.div`
   margin-bottom: 8px;
   background-color: ${props => (props['data-is-dragging'] ? 'lightgreen' : 'white')};
   font-family: 'Courier New', monospace;
-  font-weight: ${props => (props['data-is-hovering'] || props['data-is-dragging'] ? 'bold' : 'normal')};
-  box-shadow: ${props => (props['data-is-hovering'] || props['data-is-dragging']? '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 4px 8px 0 rgba(0, 0, 0, 0.19)' : '0')};
+  font-weight: ${props => (props['data-is-hovering'] || props['data-is-dragging'] ? 'bold' : 'inherit')};
+  box-shadow: ${props => (props['data-is-hovering'] || props['data-is-dragging']? '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 4px 8px 0 rgba(0, 0, 0, 0.19)' : 'inherit')};
   display: flex;
 `;
 
@@ -34,8 +34,8 @@ export default class Task extends React.Component {
             data-is-hovering={this.state.isHovering}
             onMouseOverCapture={() => {this.setState({isHovering: true})}}
             onMouseOutCapture={() =>  {this.setState({isHovering: false})}}
-          >          
-            {this.props.index}. {this.props.task.content}
+          >
+            {this.props.index + '. ' + this.props.task.content}
           </Container>
         )}
       </Draggable>
