@@ -8,7 +8,7 @@ const Container = styled.div`
   border-radius: 25px;
   padding: 8px;
   margin-bottom: 8px;
-  background-color: ${props => (props['data-is-dragging'] ? 'lightgreen' : 'white')};
+  background-color: white;
   font-family: 'Courier New', monospace;
   font-weight: ${props => (props['data-is-hovering'] || props['data-is-dragging'] ? 'bold' : 'inherit')};
   box-shadow: ${props => (props['data-is-hovering'] || props['data-is-dragging']? '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 4px 8px 0 rgba(0, 0, 0, 0.19)' : 'inherit')};
