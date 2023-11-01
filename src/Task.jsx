@@ -15,7 +15,6 @@ const Container = styled.div`
   display: flex;
 `;
 
-
 export default class Task extends React.Component {
 
   state = {
@@ -24,7 +23,7 @@ export default class Task extends React.Component {
 
   render() {
     return (
-      <Draggable draggableId={this.props.task.id} index={this.props.index}>
+      <Draggable draggableId={this.props.task.id} index={this.props.index} type={this.props.title}>
         {(provided, snaphshot) => (
           <Container 
             ref={provided.innerRef}
@@ -33,9 +32,9 @@ export default class Task extends React.Component {
             data-is-dragging={snaphshot.isDragging}
             data-is-hovering={this.state.isHovering}
             onMouseOverCapture={() => {this.setState({isHovering: true})}}
-            onMouseOutCapture={() =>  {this.setState({isHovering: false})}}
+            onMouseOutCapture={() => {this.setState({isHovering: false})}}
           >
-            {this.props.index + '. ' + this.props.task.content}
+            {this.props.index+1 + '. ' + this.props.task.content}
           </Container>
         )}
       </Draggable>
