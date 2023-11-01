@@ -2,9 +2,8 @@ import React from 'react';
 import { useState } from 'react';
 import styled from 'styled-components'
 import { DragDropContext } from 'react-beautiful-dnd';
-
 import Column from './Column'
-import initialData from './initialData';
+import { getInitialData } from './services/data';
 
 
 const Container = styled.div`
@@ -49,10 +48,15 @@ function Category({categoryData}) {
 
 
 export default function App() {
+
+  const [loadedData, setLoadedData] = useState({});
+
+  getInitialData(loadedData, setLoadedData);
+
   return (
     <Container>
-      {Object.keys(initialData.columns).map(columnID => {
-          const column = initialData.columns[columnID];
+      {Object.keys(loadedData).map(columnID => {
+          const column = loadedData[columnID];
           return <Category key={columnID} categoryData={column} />;
         })}
     </Container>
