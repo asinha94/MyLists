@@ -23,7 +23,7 @@ export default class Task extends React.Component {
 
   render() {
     return (
-      <Draggable draggableId={this.props.task.id} index={this.props.index} type={this.props.title}>
+      <Draggable draggableId={this.props.item.id} index={this.props.index} type={this.props.title}>
         {(provided, snaphshot) => (
           <Container 
             ref={provided.innerRef}
@@ -34,7 +34,7 @@ export default class Task extends React.Component {
             onMouseOverCapture={() => {this.setState({isHovering: true})}}
             onMouseOutCapture={() => {this.setState({isHovering: false})}}
           >
-            {this.props.index+1 + '. ' + this.props.task.content}
+            {this.props.index+1 + '. ' + this.props.item.content}
           </Container>
         )}
       </Draggable>

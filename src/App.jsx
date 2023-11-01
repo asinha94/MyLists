@@ -11,10 +11,9 @@ const Container = styled.div`
   display: flex;
 `
 
+function Category({categoryData}) {
 
-export default function App() {
-
-  const [data, setData] = useState(initialData)
+  const [data, setData] = useState(categoryData)
 
   const onDragEnd = result => {
     //console.log(result);
@@ -30,38 +29,36 @@ export default function App() {
         return;
     }
   
-    const columns = data.columns[source.droppableId]
-    const newTaskIds = Array.from(columns.taskIds)
+    const newItemIds = Array.from(data.itemIds)
     // Remove from old position, insert into new
-    newTaskIds.splice(source.index, 1);
-    newTaskIds.splice(destination.index, 0, draggableId)
+    newItemIds.splice(source.index, 1);
+    newItemIds.splice(destination.index, 0, draggableId)
     
-    const newColumn = {
-      ...columns,
-      taskIds: newTaskIds
-    }
-
     const newData = {
       ...data,
-      columns: {
-        ...data.columns,
-        [newColumn.id]: newColumn
-      }
+      itemIds: newItemIds
     }
-    console.log(newData);
-    setData(newData);
 
+    setData(newData);
   }
+
+  const items = data.itemIds.map(itemID => data.items[itemID]);
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <Container>
-        {data.columnOrder.map(columnID => {
-          const column = data.columns[columnID];
-          const tasks = column.taskIds.map(taskId => data.tasks[taskId]);
-          return <Column key={column.id} column={column} tasks={tasks} />;
-        })}
-      </Container>
+      <Column key={data.id} column={data} items={items} />;
     </DragDropContext>
   );
+}
+
+
+export default function App() {
+  return (
+    <Container>
+      {initialData.columnOrder.map(columnID => {
+          const column = initialData.columns[columnID];
+          return <Category key={columnID} categoryData={column} />;
+        })}
+    </Container>
+  )
 }
