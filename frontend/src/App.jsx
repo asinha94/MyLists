@@ -41,7 +41,7 @@ function Category({categoryData}) {
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <Column key={data.id} column={data} items={data.items} />;
+      <Column key={data.id} column={data} items={data.items} />
     </DragDropContext>
   );
 }
@@ -57,7 +57,7 @@ export default function App() {
     <Container>
       {Object.keys(loadedData).map(columnID => {
           const column = loadedData[columnID];
-          return <Category key={columnID} categoryData={column} />;
+          return <Category key={columnID} categoryData={column} />
         })}
     </Container>
   )
