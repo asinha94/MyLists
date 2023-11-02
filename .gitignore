@@ -4,6 +4,7 @@
 /frontend/node_modules
 /.pnp
 .pnp.js
+node_modules
 
 # testing
 /coverage
@@ -24,3 +25,6 @@ yarn-error.log*
 
 # Rust
 /backend/target
+__pycache__
+
+
