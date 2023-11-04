@@ -1,11 +1,9 @@
 
-#![feature(proc_macro_hygiene, decl_macro)]
-
-#[macro_use] extern crate rocket;
-
 use std::collections::HashMap;
+
+use actix_web::{get, App, HttpServer, Responder};
+use actix_cors::Cors;
 use serde::{Deserialize, Serialize};
-use rocket_contrib::serve::StaticFiles;
 use serde_json;
 
 
@@ -36,7 +34,7 @@ struct Column {
 
 
 #[get("/data")]
-fn get_initial_data() -> String {
+async fn get_initial_data() -> impl Responder {
     let mut data = HashMap::<String, Column>::new();
     
     let movies = Column {
@@ -78,9 +76,14 @@ fn get_initial_data() -> String {
     serde_json::to_string(&data).unwrap()
 }
 
-fn main() {
-    rocket::ignite()
-        .mount("/", StaticFiles::from("/Users/asinha/Documents/Other/webdev/MyList/my-list/frontend/build"))
-        .mount("/", routes![get_initial_data])
-        .launch();
+#[actix_web::main]
+async fn main() -> std::io::Result<()>{
+    HttpServer::new(|| {
+        App::new()
+        .service(get_initial_data)
+        .wrap(Cors::permissive())
+    })
+    .bind(("127.0.0.1", 8000))?
+    .run()
+    .await
 }
