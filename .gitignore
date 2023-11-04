@@ -26,5 +26,6 @@ yarn-error.log*
 # Rust
 /backend/target
 __pycache__
+Cargo.lock
 
 
