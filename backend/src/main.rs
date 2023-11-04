@@ -3,8 +3,11 @@
 
 #[macro_use] extern crate rocket;
 
+use serde::{Deserialize, Serialize};
+use serde_json;
 
 
+#[derive(Serialize, Deserialize)]
 struct ListItem {
     id: u64,
     title: String,
@@ -14,7 +17,12 @@ struct ListItem {
 
 #[get("/data")]
 fn get_initial_data() -> String {
-    String::from("Test")
+    let item = ListItem {
+        id: 1,
+        title: String::from("Test"),
+        order_key: String::from("key_1"),
+    };
+    serde_json::to_string(&item).unwrap()
 }
 
 fn main() {
