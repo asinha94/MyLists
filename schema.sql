@@ -1,19 +1,19 @@
 
-CREATE TABLE Categories (
-    id BIGINT NOT NULL AUTO_INCREMENT,
-    created_at timestamp DEFAULT NOW(),
+CREATE TABLE categories (
+    id SERIAL NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     category_title TEXT NOT NULL,
-    link TEXT,
-    primary key(id)
+    CONSTRAINT categories_pk PRIMARY KEY(id),
+    CONSTRAINT categories_category_title_uk UNIQUE (category_title)
 );
 
 
-CREATE TABLE Items (
-    id BIGINT NOT NULL AUTO_INCREMENT,
-    category_id BIGINT,
+CREATE TABLE items (
+    id SERIAL NOT NULL,
+    category_id INTEGER NOT NULL,
     title TEXT NOT NULL,
     order_key TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW(),
-    PRIMARY KEY (id),
-    FOREIGN KEY (category_id) REFERENCES Categories(id)
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    CONSTRAINT items_pk PRIMARY KEY(id),
+    CONSTRAINT items_categories_fk FOREIGN KEY (category_id) REFERENCES categories(id)
 );

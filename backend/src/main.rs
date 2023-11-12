@@ -1,10 +1,16 @@
 
-use std::collections::HashMap;
+mod sql;
 
+use std::collections::HashMap;
 use actix_web::{get, App, HttpServer, Responder};
 use actix_cors::Cors;
 use serde::{Deserialize, Serialize};
 use serde_json;
+use sql::get_postgres_connect_uri;
+use sqlx::{Connection, PgConnection, Row, postgres::PgRow};
+
+const HOST: &str = "127.0.0.1";
+const PORT: u16 = 8000;
 
 
 #[derive(Serialize, Deserialize)]
@@ -33,10 +39,31 @@ struct Column {
 }
 
 
+#[derive(Serialize, Deserialize)]
+struct DBColumn {
+    category: String,
+}
+
+#[get("/categories")]
+async fn get_sql_categories() -> impl Responder {
+
+    let connuri = get_postgres_connect_uri();
+    let mut conn = PgConnection::connect(&connuri).await.unwrap();
+
+    let qry = sqlx::query("SELECT category_title from categories");
+    let rows = qry.map(|row: PgRow| DBColumn {
+        category: row.get("category_title"),
+    })
+    .fetch_all(&mut conn).await.unwrap();
+        
+    serde_json::to_string(&rows).unwrap()
+}
+
+
 #[get("/data")]
 async fn get_initial_data() -> impl Responder {
-    let mut data = HashMap::<String, Column>::new();
-    
+    let mut data = HashMap::new();
+
     let movies = Column {
         id: String::from("column1"),
         title: String::from("Movies"),
@@ -78,12 +105,14 @@ async fn get_initial_data() -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()>{
+
     HttpServer::new(|| {
         App::new()
         .service(get_initial_data)
+        .service(get_sql_categories)
         .wrap(Cors::permissive())
     })
-    .bind(("127.0.0.1", 8000))?
+    .bind((HOST, PORT))?
     .run()
     .await
 }
