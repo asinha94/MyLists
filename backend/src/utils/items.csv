@@ -1,75 +1,129 @@
-"Movies", "The Discovery"
-"Movies", "Super Mario"
-"Movies", "Logan"
-"Movies", "Whisper of the Heart"
-"Movies", "James Bond: No Time To Die"
-"Movies", "The Last Duel"
-"Movies", "Antman"
-"Movies", "Antman and Wasp"
-"Movies", "Antman Quantammania"
-"Movies", "Breakfast Club"
-"Movies", "Wedding Crashers"
-"Movies", "Liberal Arts"
-"Movies", ""Happythankyoumoreplease
-"Movies", "Lego Movie Pt 2"
-"Movies", "Gone Girl"
-"Movies", "Sausagefest"
-"Movies", "Death of Stalin"
-"Movies", "Last Light"
-"Movies", "Deliver Us To The Devil"
-"Movies", "Submarine (2010)"
-"Movies", "Bullet Train"
-"Movies", "American Psycho"
-"Movies", "Prisoners"
-"Movies", "Carrie"
-"Movies", "Departed"
-"Movies", "Goodfellas"
-"Movies", "her"
-"Movies", "Jojo, Rabbit"
-"Movies", "I, Origin"
-"Movies", "The Man from Toronto"
-"Movies", "In The Shadow of the Moon"
-"Movies", "Sisu"
-"Movies", "Anatomy of A Fall"
-"Movies", "Detective Pikachu"
-"Movies", "Sonic"
-"Movies", "Coherence"
-"Movies", "One Child Room"
-"Movies", "Split"
-"Movies", "Glass"
-"Movies", "Arrival"
-"Movies", "Blade Runner"
-"Movies", "Bullet Train"
-"Movies", "Flag Means Orange"
-"Movies", "Snow Piercer"
-"Movies", "Predestination"
-"Horror", "Kill List"
-"Horror", "Time Trap"
-"Horror", "Cabin in the Woods"
-"Horror", "It"
-"Horror", "It Pt 2"
-"Horror", "The Lighthouse"
-"Horror", "Malignant"
-"Horror", "Malevelont"
-"Horror", "Mouth of Madnes"
-"Horror", "Slither"
-"Horror", "Nope"
-"Horror", "Creep 2"
-"Horror", "Annabelle"
-"Horror", "The Void"
-"Horror", "Black Mountainside"
-"Horror", "The Mist"
-"Horror", "The Shining"
-"Horror", "Beau is Afraid"
-"TV Shows", ""
-"TV Shows", ""
-"TV Shows", ""
-"TV Shows", ""
-"TV Shows", ""
-"TV Shows", ""
-"TV Shows", ""
-"TV Shows", ""
-
-
-
-
+Movies,The Discovery
+Movies,Super Mario
+Movies,Logan
+Movies,Whisper of the Heart
+Movies,James Bond: No Time To Die
+Movies,The Last Duel
+Movies,Antman
+Movies,Antman and Wasp
+Movies,Antman Quantammania
+Movies,Breakfast Club
+Movies,Wedding Crashers
+Movies,Liberal Arts
+Movies,Happythankyoumoreplease
+Movies,Lego Movie Pt 2
+Movies,Gone Girl
+Movies,Sausagefest
+Movies,Death of Stalin
+Movies,Last Light
+Movies,Deliver Us To The Devil
+Movies,Submarine (2010)
+Movies,Bullet Train
+Movies,American Psycho
+Movies,Prisoners
+Movies,Carrie
+Movies,Departed
+Movies,Goodfellas
+Movies,her
+Movies,Jojo Rabbit
+Movies,I Origin
+Movies,The Man from Toronto
+Movies,In The Shadow of the Moon
+Movies,Sisu
+Movies,Anatomy of A Fall
+Movies,Detective Pikachu
+Movies,Sonic
+Movies,Coherence
+Movies,One Child Room
+Movies,Split
+Movies,Glass
+Movies,Arrival
+Movies,Blade Runner
+Movies,Bullet Train
+Movies,Flag Means Orange
+Movies,Snow Piercer
+Movies,Predestination
+Horror,Kill List
+Horror,Time Trap
+Horror,Cabin in the Woods
+Horror,It
+Horror,It Pt 2
+Horror,The Lighthouse
+Horror,Malignant
+Horror,Malevelont
+Horror,Mouth of Madnes
+Horror,Slither
+Horror,Nope
+Horror,Creep 2
+Horror,Annabelle
+Horror,The Void
+Horror,Black Mountainside
+Horror,The Mist
+Horror,The Shining
+Horror,Beau is Afraid
+TV Shows,Beef
+TV Shows,Luther
+TV Shows,The Fall
+TV Shows,Watchmen
+TV Shows,Haunting of Bly Manor
+TV Shows,Ozark
+TV Shows,Fringe
+TV Shows,The Leftovers
+TV Shows,Twin Peaks
+TV Shows,The Americans
+TV Shows,Mad Men
+TV Shows,Travellers
+TV Shows,Servant
+TV Shows,Firefly
+TV Shows,Dexter True Blood
+TV Shows,Coupling
+TV Shows,Love Sick
+TV Shows,Better Call Saul
+TV Shows,Upload
+TV Shows,Afterlife
+TV Shows,Love is War
+TV Shows,House of Cards
+TV Shows,Colombo
+TV Shows,The Bridge
+TV Shows,River
+TV Shows,The Hinterlands
+TV Shows,Ranch
+TV Shows,The Patient
+TV Shows,Reboot
+TV Shows,The Great
+TV Shows,The Rehearsal
+TV Shows,Succession
+TV Shows,The Son
+TV Shows,Shrinking
+TV Shows,White Lotus
+TV Shows,Cyberpunk Edgerunners
+TV Shows,Arcane
+TV Shows,Vortex
+TV Shows,Ridley
+TV Shows,Devs
+TV Shows,Homecoming
+Anime,Steins Gate
+Anime,Oshi No Ko
+Anime,Summertime Render
+Anime,Ya Boy Konming!
+Anime,Tokyo Ghoul
+Anime,Made in Abyss
+Anime,Full Metal Alchemist
+Anime,Spy X Family
+Anime,Demon Slayer
+Anime,Castlevania
+Anime,Koe No Katachi
+Anime,One Punch Man
+Anime,March Comes in Like a Lion
+Games,Cyberpunk 2077
+Games,Hogwarts Legacy
+Games,Death Stranding
+Games,Final Fantasy VII
+Games,Spiderman 2
+Games,God of War
+Games,God of War Ragnarok
+Games,Star Wars Jedi: Fallen Order
+Games,Star Wars Jedi: Survivor
+Read,Dune
+Read,Expanse
+Read,Game of Thrones
