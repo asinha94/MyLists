@@ -15,5 +15,6 @@ CREATE TABLE items (
     order_key TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     CONSTRAINT items_pk PRIMARY KEY(id),
-    CONSTRAINT items_categories_fk FOREIGN KEY (category_id) REFERENCES categories(id)
+    CONSTRAINT items_categories_fk FOREIGN KEY (category_id) REFERENCES categories(id),
+    CONSTRAINT items_title_uk UNIQUE (title)
 );

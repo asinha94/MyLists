@@ -72,7 +72,6 @@ async fn insert_items() {
     // Create the key arrays. Start at b
     const BASE: u8 = 12;
     let key_width = count.ilog(12) + 1;
-    println!("Count is {key_width}");
     let mut chars: Vec<u8> = Vec::new();
     for i in 0..key_width {
         chars.push(0);

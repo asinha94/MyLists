@@ -15,5 +15,5 @@ tokio = { version = "1", features = ["full"] }
 
 
 [[bin]]
-name = "upload"
-path = "src/utils/parse.rs"
+name = "insert"
+path = "src/utils/insert.rs"

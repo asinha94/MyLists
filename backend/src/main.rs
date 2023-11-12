@@ -55,7 +55,8 @@ async fn get_sql_categories() -> impl Responder {
     let items = sqlx::query_as::<_, DBItem>("
         SELECT i.id, c.category_title, i.title, i.order_key
         FROM items i
-        JOIN categories c ON c.id = i.category_id")
+        JOIN categories c ON c.id = i.category_id
+        ORDER BY i.order_key")
         .fetch_all(&mut conn)
         .await
         .unwrap();
@@ -64,7 +65,7 @@ async fn get_sql_categories() -> impl Responder {
 
     for item in items {
         // Lookup or insert
-        let mut category_list = data.entry(item.category_title.clone())
+        let category_list = data.entry(item.category_title.clone())
             .or_insert(Column {
                 id: item.category_title.clone(),
                 title: item.category_title.clone(),
