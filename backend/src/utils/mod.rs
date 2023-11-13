@@ -56,6 +56,13 @@ pub fn get_keys_midpoint(key_a: &String, key_b: &String) -> String {
         for _ in 0..diff {
             new_key.push('m');
         }
+        return new_key;
+    }
+
+    // This is possible when we get 2 consecutive keys
+    // e.g "abc" vs "abd". "abc" will be created again
+    if key_a == &new_key{
+        new_key.push('m');
     }
 
     new_key
