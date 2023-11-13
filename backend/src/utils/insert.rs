@@ -73,7 +73,7 @@ async fn insert_items() {
     const BASE: u8 = 12;
     let key_width = count.ilog(12) + 1;
     let mut chars: Vec<u8> = Vec::new();
-    for i in 0..key_width {
+    for _ in 0..key_width {
         chars.push(0);
     }
 

@@ -9,12 +9,10 @@ export async function getInitialData(loadedData, setLoadedData) {
   } 
   
   try {
-    const response = await fetch(
-      `http://localhost:8000/data`
-    );
+    const response = await fetch('http://localhost:8000/items');
 
     if (!response.ok) {
-      console.log("Got error: " + response);
+      console.log("Got error: " + response.statusText);
       return;
     }
 
@@ -26,3 +24,28 @@ export async function getInitialData(loadedData, setLoadedData) {
     return;
   }
 };
+
+
+export async function sendReorderedItem(changeDelta) {
+
+  try {
+    const response = await fetch('http://localhost:8000/reorder', {
+      method: 'POST',
+      headers: {
+        'Accept': 'appplication/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(changeDelta)
+      }
+    );
+
+    if (!response.ok) {
+      console.log("Got error: " + response.statusText);
+      return;
+    }
+
+  } catch(err) {
+    console.log(err.message);
+    return;
+  }
+}
