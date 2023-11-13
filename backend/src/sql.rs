@@ -36,3 +36,19 @@ pub async fn get_all_items() -> Vec<DBItem> {
         .await
         .unwrap()
 }
+
+
+pub async fn update_item_order(id: i32, order_key: &String) {
+    let connuri = get_postgres_connect_uri();
+    let mut conn = PgConnection::connect(&connuri).await.unwrap();
+
+    sqlx::query_as::<_, DBItem>("
+        UPDATE items
+        SET order_key = $1
+        WHERE id = $2")
+        .bind(order_key)
+        .bind(id)
+        .fetch_all(&mut conn)
+        .await
+        .unwrap();
+}

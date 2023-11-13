@@ -41,11 +41,14 @@ export async function sendReorderedItem(changeDelta) {
 
     if (!response.ok) {
       console.log("Got error: " + response.statusText);
-      return;
+      return null;
     }
+
+    const responseData = await response.json();
+    return responseData
 
   } catch(err) {
     console.log(err.message);
-    return;
+    return null;
   }
 }

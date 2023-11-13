@@ -15,15 +15,24 @@ const PORT: u16 = 8000;
 #[post("/reorder")]
 async fn reorder_item(body: web::Json<api::ChangeDelta>) -> impl Responder {
     let change_delta = body.0;
-
-    // TODO make items optional
-    let first_key = change_delta.itemBefore.order_key;
-    let second_key = change_delta.itemAfter.order_key;
     
-    // SQL update
+    let first_key = &change_delta.itemBefore.order_key;
+    let second_key = &change_delta.itemAfter.order_key;
     let new_key = utils::get_keys_midpoint(&first_key, &second_key);
-    println!("{} {} {}", first_key, new_key, second_key);
-    HttpResponse::Ok()
+
+    let mut updated_item = change_delta.item;
+    let id = updated_item.id.parse().unwrap();
+    sql::update_item_order(id, &new_key).await;
+
+    println!("{} item (id {}) {} OrderKey {} -> {}",
+        change_delta.category,
+        updated_item.id,
+        updated_item.content,
+        updated_item.order_key,
+        new_key);
+
+    updated_item.order_key = new_key;
+    HttpResponse::Ok().body(serde_json::to_string(&updated_item).unwrap())
 }
 
 

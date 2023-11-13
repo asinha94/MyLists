@@ -86,6 +86,7 @@ async fn insert_items() {
                 let ascii: u8 = 98 + (chr * 2);
                 key.push(ascii as char);
             }
+            key.push('m');
             increment_key_array(&mut chars, BASE);
 
             sqlx::query(qry)

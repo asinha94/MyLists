@@ -28,6 +28,7 @@ pub struct Column {
     pub items: Vec<UIItem>
 }
 
+#[allow(non_snake_case)]
 #[derive(Serialize, Deserialize)]
 pub struct ChangeDelta {
     pub category: String,

@@ -15,10 +15,15 @@ function Category({categoryData}) {
   const [data, setData] = useState(categoryData);
 
   const createChangeDelta = (newIndex, newItems) => {
-    
+    const emptyItem = {
+      id: "",
+      content: "",
+      order_key: ""
+    };
+
     let item = newItems[newIndex];
-    let itemBefore = null;
-    let itemAfter = null;
+    let itemBefore = emptyItem;
+    let itemAfter = emptyItem;
 
     // exclude case where item moved to the top
     if (newIndex !== 0) {
@@ -31,10 +36,10 @@ function Category({categoryData}) {
     }
 
     return {
-      "category": data.title,
-      "itemBefore": itemBefore,
-      "item": item,
-      "itemAfter": itemAfter,
+      category: data.title,
+      itemBefore: itemBefore,
+      item: item,
+      itemAfter: itemAfter,
     }
   };
 
@@ -60,12 +65,19 @@ function Category({categoryData}) {
       items: newItems
     }
 
-    setData(newData);
-
-    // Send update to backend
+    // Send update to backend and hopefully get a response
     const changeDelta = createChangeDelta(destination.index, newItems);
-    sendReorderedItem(changeDelta)
+    const newItem = await sendReorderedItem(changeDelta);
     
+    // Dont re-render if there is an error
+    if (newItem !== null) {
+      
+      newItems[destination.index] = newItem;
+      console.log(newItem);
+      console.log(newItems);
+      setData(newData);
+    }
+
   }
 
   return (
