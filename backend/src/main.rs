@@ -1,6 +1,7 @@
 
 pub mod sql;
 mod api;
+mod utils;
 
 use std::collections::HashMap;
 use env_logger::Env;
@@ -8,16 +9,20 @@ use actix_web::{get, post, web, App, HttpServer, Responder, HttpResponse, middle
 use actix_cors::Cors;
 use serde_json;
 
-
-
 const HOST: &str = "127.0.0.1";
 const PORT: u16 = 8000;
 
 #[post("/reorder")]
 async fn reorder_item(body: web::Json<api::ChangeDelta>) -> impl Responder {
     let change_delta = body.0;
-    println!("{}", serde_json::to_string(&change_delta).unwrap());
+
+    // TODO make items optional
+    let first_key = change_delta.itemBefore.order_key;
+    let second_key = change_delta.itemAfter.order_key;
     
+    // SQL update
+    let new_key = utils::get_keys_midpoint(&first_key, &second_key);
+    println!("{} {} {}", first_key, new_key, second_key);
     HttpResponse::Ok()
 }
 

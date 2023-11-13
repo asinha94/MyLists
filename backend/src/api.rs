@@ -5,9 +5,9 @@ use crate::sql::DBItem;
 
 #[derive(Serialize, Deserialize)]
 pub struct UIItem {
-    id: String,
-    content: String,
-    order_key: String,
+    pub id: String,
+    pub content: String,
+    pub order_key: String,
 }
 
 impl UIItem {
