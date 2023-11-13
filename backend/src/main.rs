@@ -9,7 +9,7 @@ use actix_web::{get, post, web, App, HttpServer, Responder, HttpResponse, middle
 use actix_cors::Cors;
 use serde_json;
 
-const HOST: &str = "127.0.0.1";
+const HOST: &str = "0.0.0.0";
 const PORT: u16 = 8000;
 
 #[post("/reorder")]
