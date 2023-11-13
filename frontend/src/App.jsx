@@ -65,19 +65,23 @@ function Category({categoryData}) {
       items: newItems
     }
 
+    setData(newData);
+
     // Send update to backend and hopefully get a response
     const changeDelta = createChangeDelta(destination.index, newItems);
-    const newItem = await sendReorderedItem(changeDelta);
-    
-    // Dont re-render if there is an error
-    if (newItem !== null) {
-      
-      newItems[destination.index] = newItem;
-      console.log(newItem);
-      console.log(newItems);
-      setData(newData);
-    }
+    sendReorderedItem(changeDelta).then(newItem => {
 
+      // Re-render the old list if there is an error
+      if (newItem === null) {
+        setData(data);
+        return;
+      }
+
+      // If no error, update the item with the new key
+      // Unfortunately needs a re-render
+      newItems[destination.index] = newItem;
+      setData(newData);
+    })
   }
 
   return (
