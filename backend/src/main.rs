@@ -17,6 +17,9 @@ async fn reorder_item(body: web::Json<api::ChangeDelta>) -> impl Responder {
     let change_delta = body.0;
 
     // TODO make items optional
+    // Also handle issue of only 1 char between 2 keys
+    // e.g ABC vs ABD will generate ABC again.
+    // We need to know to extend the key
     let first_key = change_delta.itemBefore.order_key;
     let second_key = change_delta.itemAfter.order_key;
     
