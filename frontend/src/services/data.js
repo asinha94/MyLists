@@ -1,5 +1,9 @@
 import { isEmpty } from "../utilities";
 
+const PROTOCOL = window.location.protocol;
+const HOST = window.location.hostname;
+const PORT = 8000;
+const API_URL = `${PROTOCOL}//${HOST}:${PORT}`
 
 export async function getInitialData(loadedData, setLoadedData) {
   
@@ -9,7 +13,7 @@ export async function getInitialData(loadedData, setLoadedData) {
   } 
   
   try {
-    const response = await fetch('http://localhost:8000/items');
+    const response = await fetch(API_URL + '/items');
 
     if (!response.ok) {
       console.log("Got error: " + response.statusText);
@@ -29,7 +33,7 @@ export async function getInitialData(loadedData, setLoadedData) {
 export async function sendReorderedItem(changeDelta) {
 
   try {
-    const response = await fetch('http://localhost:8000/reorder', {
+    const response = await fetch(API_URL + '/reorder', {
       method: 'POST',
       headers: {
         'Accept': 'appplication/json',
