@@ -41,14 +41,12 @@ function ItemContainer({index, item, provided, snaphshot}) {
 
 }
 
-
-export default function ItemDraggable({key, item, index, title}) {
+export default function ItemDraggable({item, index, title}) {
     return (
-      <Draggable draggableId={this.props.item.id} index={this.props.index} type={this.props.title}>
+      <Draggable draggableId={item.id} index={index} type={title}>
         {(provided, snaphshot) => (
-          <ItemContainer index={this.props.index} item={this.props.item} provided={provided} snaphshot={snaphshot}/>
+          <ItemContainer index={index} item={item} provided={provided} snaphshot={snaphshot}/>
         )}
       </Draggable>
     );
-
 }
