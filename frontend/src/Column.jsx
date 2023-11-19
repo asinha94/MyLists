@@ -5,7 +5,7 @@ import { getInitialData, sendReorderedItem } from './services';
 
 const columnStyle = {
   "margin": "8px",
-  "border": "1px solid lightgrey",
+  "border": "1px solid #545454",
   "borderRadius": "2px",
   "width": "300px"
 }

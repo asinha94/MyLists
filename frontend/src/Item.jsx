@@ -8,7 +8,7 @@ function ItemContainer({index, item, provided, snaphshot}) {
   const dragHandleProps = provided.dragHandleProps;
   const isDragging = snaphshot.isDragging;
   const style = {
-    "border": "2px solid lightgrey",
+    "border": "2px solid #545454",
     "borderRadius": "25px",
     "padding": "8px",
     "marginBottom": "8px",
