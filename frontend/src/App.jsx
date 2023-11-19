@@ -1,5 +1,5 @@
 // React
-import React from 'react';
+import React, { useState } from 'react';
 //Material UI
 import { styled, alpha } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
@@ -10,9 +10,14 @@ import Typography from '@mui/material/Typography';
 import InputBase from '@mui/material/InputBase';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
+import InputLabel from '@mui/material/InputLabel';
+import FormControl from '@mui/material/FormControl';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Categories from './Column'
+import { getInitialData } from './services';
 
 
 const darkTheme = createTheme({
@@ -65,7 +70,34 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 
-function SearchAppBar() {
+function CategoryDropdown({categories, selectedCategory, setSelectedCategory}) {  
+  const handleChange = (event) => {
+    setSelectedCategory(event.target.value);
+  };
+
+  return (
+    <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+    <InputLabel id="demo-simple-select-standard-label">Age</InputLabel>
+    <Select
+      labelId="demo-simple-select-standard-label"
+      id="demo-simple-select-standard"
+      value={selectedCategory}
+      onChange={handleChange}
+      label="Age"
+    >
+      <MenuItem value="">
+        <em>None</em>
+      </MenuItem>
+      {categories.map(category => {
+        return <MenuItem key={category} value={category}>{category}</MenuItem>
+      })}
+    </Select>
+  </FormControl>
+  );
+}
+
+
+function SearchAppBar({categories, selectedCategory, setSelectedCategory}) {
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
@@ -85,8 +117,13 @@ function SearchAppBar() {
             component="div"
             sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
           >
-            MUI
+            My Lists
           </Typography>
+          <CategoryDropdown
+            categories={categories}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+          />
           <Search>
             <SearchIconWrapper>
               <SearchIcon />
@@ -104,11 +141,21 @@ function SearchAppBar() {
 
 
 export default function App() {
+  const [loadedData, setLoadedData] = useState({});
+  const categories = Object.keys(loadedData).sort().map(column => column);
+  const [selectedCategory, setSelectedCategory] = React.useState('');
+  
+  // GET the full list from the API
+  getInitialData(loadedData, setLoadedData);
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <SearchAppBar/>
-      <Categories/>
+      <SearchAppBar
+        categories={categories}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        />
+      <Categories loadedData={loadedData}/>
     </ThemeProvider> 
   )
 }

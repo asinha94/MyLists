@@ -132,10 +132,7 @@ function Category({categoryData}) {
 }
 
 
-export default function Columns() {
-  const [loadedData, setLoadedData] = useState({});
-  getInitialData(loadedData, setLoadedData);
-
+export default function Columns({loadedData}) {
   return (
     <div style={{display: "flex"}}>
         {Object.keys(loadedData).sort().map(columnID => {
