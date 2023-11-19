@@ -1,46 +1,51 @@
 import React from 'react';
-import styled from 'styled-components'
 import { Droppable } from 'react-beautiful-dnd';
-import Task from './Task'
+import Item from './Item'
 
-const Container = styled.div`
-  margin: 8px;
-  border: 1px solid lightgrey;
-  border-radius: 2px;
-  width: 300px;
-`;
+const columnStyle = {
+  "margin": "8px",
+  "border": "1px solid lightgrey",
+  "borderRadius": "2px",
+  "width": "300px"
+}
 
-const Title = styled.h3`
-  padding: 8px;
-  font-family: 'Courier New', monospace;
-`;
+const titleSyle = {
+  "padding": "8px",
+  "fontFamily": "'Courier New', monospace"
+}
 
-const TaskList = styled.div`
-  padding: 8px;
-  flex-grow: 1;
-  min-height: 100px;
-`;
+const itemListStyle = {
+  "padding": "8px",
+  "flexGrow": 1,
+  "minHeight": "100px"
+}
 
 
-export default class Column extends React.Component {
-  render() {
-    const title = this.props.column.title;
-    return (
-      <Container>
-        <Title>{title}</Title>
-        <Droppable droppableId={this.props.column.id} type={title}>
-          {(provided, snaphshot) => (
-            <TaskList
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-              data-is-dragging-over={snaphshot.isDraggingOver}
-            >
-              {this.props.items.map((item, index) => <Task key={item.id} item={item} index={index} title={title}/>)}
-              {provided.placeholder}
-            </TaskList>
-          )}
-        </Droppable>
-      </Container>
-    );
-  }
+export default function Column({column, items}) {
+  const title = column.title;
+  
+  return (
+    <div style={columnStyle}>
+      <h3 style={titleSyle}>{title}</h3>
+      <Droppable droppableId={column.id} type={title}>
+        {(provided, snaphshot) => {
+
+          const style = {
+            ...provided.droppableProps.style,
+            ...itemListStyle
+          };
+
+          return (
+          <div
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+            style={style}
+          >
+            {items.map((item, index) => <Item key={item.id} item={item} index={index} title={title}/>)}
+            {provided.placeholder}
+          </div>)
+        }}
+      </Droppable>
+    </div>
+  );
 }

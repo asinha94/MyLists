@@ -1,14 +1,9 @@
 import React from 'react';
 import { useState } from 'react';
-import styled from 'styled-components'
 import { DragDropContext } from 'react-beautiful-dnd';
 import Column from './Column'
 import { getInitialData, sendReorderedItem } from './services/data';
 
-
-const Container = styled.div`
-  display: flex;
-`
 
 function Category({categoryData}) {
 
@@ -99,11 +94,11 @@ export default function App() {
   getInitialData(loadedData, setLoadedData);
 
   return (
-    <Container>
+    <div style={{display: "flex"}}>
       {Object.keys(loadedData).sort().map(columnID => {
           const column = loadedData[columnID];
           return <Category key={columnID} categoryData={column} />
         })}
-    </Container>
+    </div>
   )
 }
