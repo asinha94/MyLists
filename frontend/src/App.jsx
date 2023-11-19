@@ -17,7 +17,7 @@ import Select from '@mui/material/Select';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import {isMobile} from 'react-device-detect';
-import Categories from './Column'
+import Columns from './Column'
 import { getInitialData } from './services';
 
 
@@ -159,7 +159,11 @@ export default function App() {
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
         />
-      <Categories loadedData={loadedData}/>
+      <Columns
+        loadedData={loadedData}
+        categories={categories}
+        selectedCategory={selectedCategory}
+      />
     </ThemeProvider> 
   )
 }

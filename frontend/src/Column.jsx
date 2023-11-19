@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Droppable, DragDropContext } from 'react-beautiful-dnd';
+import { isMobile } from 'react-device-detect';
 import Item from './Item'
-import { getInitialData, sendReorderedItem } from './services';
+import { sendReorderedItem } from './services';
 
 const columnStyle = {
   "margin": "8px",
@@ -132,13 +133,24 @@ function Category({categoryData}) {
 }
 
 
-export default function Columns({loadedData}) {
+export default function Columns({loadedData, categories, selectedCategory}) {
+  if (isMobile) {
+    if (selectedCategory) {
+      const column = loadedData[selectedCategory];
+      return (
+        <Category key={selectedCategory} categoryData={column} />
+      )
+    }
+
+    return <div/>
+  }
+  
   return (
     <div style={{display: "flex"}}>
-        {Object.keys(loadedData).sort().map(columnID => {
-            const column = loadedData[columnID];
-            return <Category key={columnID} categoryData={column} />
-          })}
-      </div>
-  );
+      {categories.map(columnID => {
+          const column = loadedData[columnID];
+          return <Category key={columnID} categoryData={column} />
+        })}
+    </div>
+  )
 }
