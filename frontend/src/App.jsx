@@ -16,6 +16,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import {isMobile} from 'react-device-detect';
 import Categories from './Column'
 import { getInitialData } from './services';
 
@@ -75,25 +76,27 @@ function CategoryDropdown({categories, selectedCategory, setSelectedCategory}) {
     setSelectedCategory(event.target.value);
   };
 
-  return (
-    <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-    <InputLabel id="demo-simple-select-standard-label">Age</InputLabel>
-    <Select
-      labelId="demo-simple-select-standard-label"
-      id="demo-simple-select-standard"
-      value={selectedCategory}
-      onChange={handleChange}
-      label="Age"
-    >
-      <MenuItem value="">
-        <em>None</em>
-      </MenuItem>
-      {categories.map(category => {
-        return <MenuItem key={category} value={category}>{category}</MenuItem>
-      })}
-    </Select>
-  </FormControl>
-  );
+  if (isMobile) {
+    return (
+      <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+      <InputLabel id="demo-simple-select-standard-label">Category</InputLabel>
+      <Select
+        labelId="demo-simple-select-standard-label"
+        id="demo-simple-select-standard"
+        value={selectedCategory}
+        onChange={handleChange}
+        label="Category"
+      >
+        <MenuItem value="">
+          <em>None</em>
+        </MenuItem>
+        {categories.map(category => {
+          return <MenuItem key={category} value={category}>{category}</MenuItem>
+        })}
+      </Select>
+    </FormControl>
+    );
+  }
 }
 
 
@@ -119,11 +122,7 @@ function SearchAppBar({categories, selectedCategory, setSelectedCategory}) {
           >
             My Lists
           </Typography>
-          <CategoryDropdown
-            categories={categories}
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-          />
+
           <Search>
             <SearchIconWrapper>
               <SearchIcon />
@@ -133,6 +132,12 @@ function SearchAppBar({categories, selectedCategory, setSelectedCategory}) {
               inputProps={{ 'aria-label': 'search' }}
             />
           </Search>
+
+          <CategoryDropdown
+            categories={categories}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+          />
         </Toolbar>
       </AppBar>
     </Box>
@@ -144,7 +149,6 @@ export default function App() {
   const [loadedData, setLoadedData] = useState({});
   const categories = Object.keys(loadedData).sort().map(column => column);
   const [selectedCategory, setSelectedCategory] = React.useState('');
-  
   // GET the full list from the API
   getInitialData(loadedData, setLoadedData);
   return (
