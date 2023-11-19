@@ -4,7 +4,6 @@ import { Draggable } from 'react-beautiful-dnd';
 
 function ItemContainer({index, item, provided, snaphshot}) {
   const [isHovering, setIsHovering] = useState(false);
-
   const draggableProps = provided.draggableProps;
   const dragHandleProps = provided.dragHandleProps;
   const isDragging = snaphshot.isDragging;
@@ -20,6 +19,7 @@ function ItemContainer({index, item, provided, snaphshot}) {
     "display": "flex",
   };
 
+  // Have to make sure not to clobber the dnd styles
   const styles = {
     ...draggableProps.style,
     ...dragHandleProps.style,
@@ -42,13 +42,7 @@ function ItemContainer({index, item, provided, snaphshot}) {
 }
 
 
-export default class Task extends React.Component {
-
-  state = {
-    isHovering: false
-  }
-
-  render() {
+export default function ItemDraggable({key, item, index, title}) {
     return (
       <Draggable draggableId={this.props.item.id} index={this.props.index} type={this.props.title}>
         {(provided, snaphshot) => (
@@ -56,5 +50,5 @@ export default class Task extends React.Component {
         )}
       </Draggable>
     );
-  }
+
 }
