@@ -1,104 +1,169 @@
-import React from 'react';
-import { useState } from 'react';
-import { DragDropContext } from 'react-beautiful-dnd';
-import Column from './Column'
-import { getInitialData, sendReorderedItem } from './services/data';
+// React
+import React, { useState } from 'react';
+//Material UI
+import { styled, alpha } from '@mui/material/styles';
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
+import Toolbar from '@mui/material/Toolbar';
+import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
+import InputBase from '@mui/material/InputBase';
+import MenuIcon from '@mui/icons-material/Menu';
+import SearchIcon from '@mui/icons-material/Search';
+import InputLabel from '@mui/material/InputLabel';
+import FormControl from '@mui/material/FormControl';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import {isMobile} from 'react-device-detect';
+import Columns from './Column'
+import { getInitialData } from './services';
 
 
-function Category({categoryData}) {
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+  },
+});
 
-  const [data, setData] = useState(categoryData);
 
-  const createChangeDelta = (newIndex, newItems) => {
-    const emptyItem = {
-      id: "",
-      content: "",
-      order_key: ""
-    };
+const Search = styled('div')(({ theme }) => ({
+  position: 'relative',
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: alpha(theme.palette.common.white, 0.15),
+  '&:hover': {
+    backgroundColor: alpha(theme.palette.common.white, 0.25),
+  },
+  marginLeft: 0,
+  width: '100%',
+  [theme.breakpoints.up('sm')]: {
+    marginLeft: theme.spacing(1),
+    width: 'auto',
+  },
+}));
 
-    let item = newItems[newIndex];
-    let itemBefore = emptyItem;
-    let itemAfter = emptyItem;
+const SearchIconWrapper = styled('div')(({ theme }) => ({
+  padding: theme.spacing(0, 2),
+  height: '100%',
+  position: 'absolute',
+  pointerEvents: 'none',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+}));
 
-    // exclude case where item moved to the top
-    if (newIndex !== 0) {
-      itemBefore = newItems[newIndex-1]
-    }
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
+  color: 'inherit',
+  '& .MuiInputBase-input': {
+    padding: theme.spacing(1, 1, 1, 0),
+    // vertical padding + font size from searchIcon
+    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+    transition: theme.transitions.create('width'),
+    width: '100%',
+    [theme.breakpoints.up('sm')]: {
+      width: '12ch',
+      '&:focus': {
+        width: '20ch',
+      },
+    },
+  },
+}));
 
-    const endIndex = newItems.length - 1; 
-    if (newIndex !== endIndex) {
-      itemAfter = newItems[newIndex+1]
-    }
 
-    return {
-      category: data.title,
-      itemBefore: itemBefore,
-      item: item,
-      itemAfter: itemAfter,
-    }
+function CategoryDropdown({categories, selectedCategory, setSelectedCategory}) {  
+  const handleChange = (event) => {
+    setSelectedCategory(event.target.value);
   };
 
-  const onDragEnd = result => {
-    //console.log(result);
-    const {destination, source} = result;
-    // Dropped from list
-    if (!destination) {
-      return;
-    }
-    
-    // Moved to same position
-    if (destination.droppableId === source.droppableId && destination.index === source.index) {
-        return;
-    }
-  
-    // Remove from old position, insert into new
-    const newItems = Array.from(data.items)
-    const [item] = newItems.splice(source.index, 1);
-    newItems.splice(destination.index, 0, item)
-    const newData = {
-      ...data,
-      items: newItems
-    }
-
-    setData(newData);
-
-    // Send update to backend and hopefully get a response
-    const changeDelta = createChangeDelta(destination.index, newItems);
-    sendReorderedItem(changeDelta).then(newItem => {
-
-      // Re-render the old list if there is an error
-      if (newItem === null) {
-        setData(data);
-        return;
-      }
-
-      // If no error, update the item with the new key
-      // Unfortunately needs a re-render
-      newItems[destination.index] = newItem;
-      setData(newData);
-    })
+  if (isMobile) {
+    return (
+      <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+      <InputLabel id="demo-simple-select-standard-label">Category</InputLabel>
+      <Select
+        labelId="demo-simple-select-standard-label"
+        id="demo-simple-select-standard"
+        value={selectedCategory}
+        onChange={handleChange}
+        label="Category"
+      >
+        <MenuItem value="">
+          <em>None</em>
+        </MenuItem>
+        {categories.map(category => {
+          return <MenuItem key={category} value={category}>{category}</MenuItem>
+        })}
+      </Select>
+    </FormControl>
+    );
   }
+}
 
+
+function SearchAppBar({categories, selectedCategory, setSelectedCategory}) {
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <Column key={data.id} column={data} items={data.items} />
-    </DragDropContext>
+    <Box sx={{ flexGrow: 1 }}>
+      <AppBar position="static">
+        <Toolbar>
+          <IconButton
+            size="large"
+            edge="start"
+            color="inherit"
+            aria-label="open drawer"
+            sx={{ mr: 2 }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography
+            variant="h6"
+            noWrap
+            component="div"
+            sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
+          >
+            My Lists
+          </Typography>
+
+          <Search>
+            <SearchIconWrapper>
+              <SearchIcon />
+            </SearchIconWrapper>
+            <StyledInputBase
+              placeholder="Search…"
+              inputProps={{ 'aria-label': 'search' }}
+            />
+          </Search>
+
+          <CategoryDropdown
+            categories={categories}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+          />
+        </Toolbar>
+      </AppBar>
+    </Box>
   );
 }
 
 
 export default function App() {
-
   const [loadedData, setLoadedData] = useState({});
-
+  const categories = Object.keys(loadedData).sort().map(column => column);
+  const [selectedCategory, setSelectedCategory] = React.useState('');
+  // GET the full list from the API
   getInitialData(loadedData, setLoadedData);
-
   return (
-    <div style={{display: "flex"}}>
-      {Object.keys(loadedData).sort().map(columnID => {
-          const column = loadedData[columnID];
-          return <Category key={columnID} categoryData={column} />
-        })}
-    </div>
+    <ThemeProvider theme={darkTheme}>
+      <CssBaseline />
+      <SearchAppBar
+        categories={categories}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        />
+      <Columns
+        loadedData={loadedData}
+        categories={categories}
+        selectedCategory={selectedCategory}
+      />
+    </ThemeProvider> 
   )
 }

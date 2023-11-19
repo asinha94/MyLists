@@ -1,4 +1,4 @@
-import { isEmpty } from "../utilities";
+import { isEmpty } from "./utilities";
 
 const PROTOCOL = window.location.protocol;
 const HOST = window.location.hostname;
