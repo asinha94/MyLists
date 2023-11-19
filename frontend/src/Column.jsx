@@ -8,7 +8,7 @@ const columnStyle = {
   "margin": "8px",
   "border": "1px solid #545454",
   "borderRadius": "2px",
-  "width": "300px"
+  "width": isMobile ? "inherit" : "300px"
 }
 
 const titleSyle = {
