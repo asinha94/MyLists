@@ -28,6 +28,7 @@ mod tests {
         test_cmp("keyaaaa", "keybbbb");
         test_cmp("", "keyaaaamm");
         test_cmp("", "keyaaaaammmm");
+        test_cmp("", "keyaaaammm");
     }
 }
 
@@ -91,16 +92,32 @@ pub fn get_keys_midpoint(key_first: &String, key_second: &String) -> String {
             break 'm';
         }
 
-        // key before sorted first
+        // key before sorted first. Theres an annoying edge case here where we try to insert
+        // between "keyam" and "keyaaam", but nothing can be inserted before 'a', so we have
+        // to copy the whole string, then replace the last 'm' with a 'g' or something
         if char_first == None {
             let char_second_val = char_second.unwrap();
-            break get_char_midpoint('a', char_second_val);
+            let remaining_str: String = key_second_iter.collect();
+            middle.push(char_second_val);
+            middle.push_str(&remaining_str);
+            
+            // Replace the 'm' with 'gm'
+            let sz = middle.len();
+            middle.replace_range(sz-1..sz, "gm");
+            return middle;
         }
 
         // key after sorted first, shouldnt happen but handle anyway
         if char_second == None {
             let char_first_val = char_first.unwrap();
-            break get_char_midpoint('a', char_first_val);
+            let remaining_str: String = key_first_iter.collect();
+            middle.push(char_first_val);
+            middle.push_str(&remaining_str);
+            
+            // Replace the 'm' with 'gm'
+            let sz = middle.len();
+            middle.replace_range(sz-1..sz, "gm");
+            return middle;
         }
         
         let char_first_val = char_first.unwrap();
