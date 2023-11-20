@@ -12,7 +12,7 @@ use serde_json;
 const HOST: &str = "0.0.0.0";
 const PORT: u16 = 8000;
 
-#[post("/reorder")]
+#[post("/api/reorder")]
 async fn reorder_item(body: web::Json<api::ChangeDelta>) -> impl Responder {
     let change_delta = body.0;
     
@@ -37,7 +37,7 @@ async fn reorder_item(body: web::Json<api::ChangeDelta>) -> impl Responder {
 
 
 
-#[get("/items")]
+#[get("/api/items")]
 async fn get_all_items() -> impl Responder {
 
     let items = sql::get_all_items().await;
