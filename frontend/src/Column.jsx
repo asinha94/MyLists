@@ -23,8 +23,12 @@ const itemListStyle = {
 }
 
 
-function Column({column, items, isDragDisabled}) {
+function Column({column, items, searchValue, isDragDisabled}) {
   const title = column.title;
+
+  const displayItems = searchValue.length === 0 ? items : items.filter((item) =>
+    item.content.includes(searchValue)
+  );
   
   return (
     <div style={columnStyle}>
@@ -42,7 +46,14 @@ function Column({column, items, isDragDisabled}) {
             {...provided.droppableProps}
             style={style}
           >
-            {items.map((item, index) => <Item key={item.id} item={item} index={index} title={title} isDragDisabled={isDragDisabled}/>)}
+            {displayItems.map((item, index) =>
+              <Item
+                key={item.id}
+                item={item}
+                index={index}
+                title={title}
+                isDragDisabled={isDragDisabled}
+              />)}
             {provided.placeholder}
           </div>)
         }}
@@ -110,7 +121,6 @@ function Category({categoryData, searchValue, isDragDisabled}) {
     // Send update to backend and hopefully get a response
     const changeDelta = createChangeDelta(destination.index, newItems);
     sendReorderedItem(changeDelta).then(newItem => {
-
       // Re-render the old list if there is an error
       if (newItem === null) {
         setData(data);
@@ -126,7 +136,13 @@ function Category({categoryData, searchValue, isDragDisabled}) {
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <Column key={data.id} column={data} items={data.items} isDragDisabled={isDragDisabled}/>
+      <Column
+        key={data.id}
+        column={data}
+        items={data.items}
+        searchValue={searchValue}
+        isDragDisabled={isDragDisabled}
+      />
     </DragDropContext>
   );
 }
