@@ -4,6 +4,7 @@ import IconButton from '@mui/material/IconButton';
 import { Droppable, DragDropContext } from 'react-beautiful-dnd';
 import { isMobile } from 'react-device-detect';
 import Item from './Item'
+import NewItemDialog from './modals';
 import { sendReorderedItem } from './services';
 
 const columnStyle = {
@@ -35,6 +36,8 @@ const PlusIcon = createSvgIcon(
 
 
 function TitleBar({title}) {
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+
   const titleSyle = {
     "padding": "8px",
     "fontFamily": "'Courier New', monospace",
@@ -48,8 +51,8 @@ function TitleBar({title}) {
     "justifyContent": "center",
   }
 
-  const plusOnClick = (event) => {
-    console.log("Click event for " + title);
+  const plusOnClick = () => {
+    setDialogOpen(true);
   }
 
   return (
@@ -58,6 +61,11 @@ function TitleBar({title}) {
       <IconButton aria-label="Example" onClick={plusOnClick}>
         <PlusIcon />
       </IconButton>
+      <NewItemDialog
+        category={title}
+        dialogOpen={dialogOpen}
+        setDialogOpen={setDialogOpen}
+      />
     </div>
   )
 }
