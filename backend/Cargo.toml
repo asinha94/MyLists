@@ -19,3 +19,10 @@ env_logger = "0.10.1"
 [[bin]]
 name = "insert"
 path = "src/utils/insert.rs"
+
+
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3
