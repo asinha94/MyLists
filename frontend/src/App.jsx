@@ -100,7 +100,7 @@ function CategoryDropdown({categories, selectedCategory, setSelectedCategory}) {
 }
 
 
-function SearchAppBar({categories, selectedCategory, setSelectedCategory}) {
+function SearchAppBar({categories, selectedCategory, setSelectedCategory, setSearchValue}) {
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
@@ -130,6 +130,10 @@ function SearchAppBar({categories, selectedCategory, setSelectedCategory}) {
             <StyledInputBase
               placeholder="Search…"
               inputProps={{ 'aria-label': 'search' }}
+              type="search"
+              onChange={(event) => {
+                setSearchValue(event.target.value);
+              }}
             />
           </Search>
 
@@ -147,8 +151,11 @@ function SearchAppBar({categories, selectedCategory, setSelectedCategory}) {
 
 export default function App() {
   const [loadedData, setLoadedData] = useState({});
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [searchValue, setSearchValue] = useState('');
+
   const categories = Object.keys(loadedData).sort().map(column => column);
-  const [selectedCategory, setSelectedCategory] = React.useState('');
+  const isDragDisabled = searchValue.length !== 0;
   // GET the full list from the API
   getInitialData(loadedData, setLoadedData);
   return (
@@ -158,10 +165,13 @@ export default function App() {
         categories={categories}
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
+        setSearchValue={setSearchValue}
         />
       <Columns
         loadedData={loadedData}
         categories={categories}
+        searchValue={searchValue}
+        isDragDisabled={isDragDisabled}
         selectedCategory={selectedCategory}
       />
     </ThemeProvider> 

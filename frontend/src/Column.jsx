@@ -23,15 +23,18 @@ const itemListStyle = {
 }
 
 
-function Column({column, items}) {
+function Column({column, items, searchValue, isDragDisabled}) {
   const title = column.title;
+
+  const displayItems = searchValue.length === 0 ? items : items.filter((item) =>
+    item.content.includes(searchValue)
+  );
   
   return (
     <div style={columnStyle}>
       <h3 style={titleSyle}>{title}</h3>
       <Droppable droppableId={column.id} type={title}>
         {(provided, snaphshot) => {
-
           const style = {
             ...provided.droppableProps.style,
             ...itemListStyle
@@ -43,7 +46,14 @@ function Column({column, items}) {
             {...provided.droppableProps}
             style={style}
           >
-            {items.map((item, index) => <Item key={item.id} item={item} index={index} title={title}/>)}
+            {displayItems.map((item, index) =>
+              <Item
+                key={item.id}
+                item={item}
+                index={index}
+                title={title}
+                isDragDisabled={isDragDisabled}
+              />)}
             {provided.placeholder}
           </div>)
         }}
@@ -52,7 +62,7 @@ function Column({column, items}) {
   );
 }
 
-function Category({categoryData}) {
+function Category({categoryData, searchValue, isDragDisabled}) {
   const [data, setData] = useState(categoryData);
 
   const createChangeDelta = (newIndex, newItems) => {
@@ -111,7 +121,6 @@ function Category({categoryData}) {
     // Send update to backend and hopefully get a response
     const changeDelta = createChangeDelta(destination.index, newItems);
     sendReorderedItem(changeDelta).then(newItem => {
-
       // Re-render the old list if there is an error
       if (newItem === null) {
         setData(data);
@@ -127,18 +136,29 @@ function Category({categoryData}) {
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <Column key={data.id} column={data} items={data.items} />
+      <Column
+        key={data.id}
+        column={data}
+        items={data.items}
+        searchValue={searchValue}
+        isDragDisabled={isDragDisabled}
+      />
     </DragDropContext>
   );
 }
 
 
-export default function Columns({loadedData, categories, selectedCategory}) {
+export default function Columns({loadedData, categories, searchValue, isDragDisabled, selectedCategory}) {
   if (isMobile) {
     if (selectedCategory) {
       const column = loadedData[selectedCategory];
       return (
-        <Category key={selectedCategory} categoryData={column} />
+        <Category
+          key={selectedCategory}
+          categoryData={column}
+          isDragDisabled={isDragDisabled}
+          searchValue={searchValue}
+        />
       )
     }
 
@@ -149,7 +169,12 @@ export default function Columns({loadedData, categories, selectedCategory}) {
     <div style={{display: "flex"}}>
       {categories.map(columnID => {
           const column = loadedData[columnID];
-          return <Category key={columnID} categoryData={column} />
+          return <Category
+            key={columnID}
+            categoryData={column}
+            isDragDisabled={isDragDisabled}
+            searchValue={searchValue}
+          />
         })}
     </div>
   )

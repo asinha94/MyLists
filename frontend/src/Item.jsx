@@ -2,7 +2,7 @@ import React, { useState} from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 
 
-function ItemContainer({index, item, provided, snaphshot}) {
+function ItemContainer({index, item, provided, snaphshot, isDragDisabled}) {
   const [isHovering, setIsHovering] = useState(false);
   const draggableProps = provided.draggableProps;
   const dragHandleProps = provided.dragHandleProps;
@@ -13,15 +13,15 @@ function ItemContainer({index, item, provided, snaphshot}) {
     "padding": "8px",
     "marginBottom": "8px",
     "fontFamily": "'Courier New', monospace",
-    "fontWeight": (isHovering || isDragging) ? "bold" : "inherit",
-    "boxShadow":  (isHovering || isDragging) ? "0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 4px 8px 0 rgba(0, 0, 0, 0.19)" : "inherit", 
+    "fontWeight": (isHovering || isDragging) && !isDragDisabled ? "bold" : "inherit",
+    "boxShadow":  (isHovering || isDragging) && !isDragDisabled ? "0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 4px 8px 0 rgba(0, 0, 0, 0.19)" : "inherit", 
     "display": "flex",
   };
 
   // Have to make sure not to clobber the dnd styles
   const styles = {
     ...draggableProps.style,
-    ...dragHandleProps.style,
+    ...(isDragDisabled ? [] : dragHandleProps.style),
     ...style
   }
 
@@ -39,11 +39,17 @@ function ItemContainer({index, item, provided, snaphshot}) {
   );
 }
 
-export default function ItemDraggable({item, index, title}) {
+export default function ItemDraggable({item, index, title, isDragDisabled}) {
     return (
-      <Draggable draggableId={item.id} index={index} type={title}>
+      <Draggable draggableId={item.id} index={index} type={title} isDragDisabled={isDragDisabled}>
         {(provided, snaphshot) => (
-          <ItemContainer index={index} item={item} provided={provided} snaphshot={snaphshot}/>
+          <ItemContainer
+            index={index}
+            item={item}
+            provided={provided}
+            snaphshot={snaphshot}
+            isDragDisabled={isDragDisabled}
+          />
         )}
       </Draggable>
     );
