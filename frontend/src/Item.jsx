@@ -7,14 +7,15 @@ function ItemContainer({index, item, provided, snaphshot, isDragDisabled}) {
   const draggableProps = provided.draggableProps;
   const dragHandleProps = provided.dragHandleProps;
   const isDragging = snaphshot.isDragging;
+  const shouldHighlight = !isDragDisabled && (isHovering || isDragging);
   const style = {
-    "border": "2px solid #545454",
+    "border": "2px solid " + (shouldHighlight ? "white": "#545454"),
     "borderRadius": "25px",
     "padding": "8px",
     "marginBottom": "8px",
     "fontFamily": "'Courier New', monospace",
-    "fontWeight": (isHovering || isDragging) && !isDragDisabled ? "bold" : "inherit",
-    "boxShadow":  (isHovering || isDragging) && !isDragDisabled ? "0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 4px 8px 0 rgba(0, 0, 0, 0.19)" : "inherit", 
+    "fontWeight": shouldHighlight ? "bold" : "inherit",
+    "boxShadow":  shouldHighlight ? "0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 4px 8px 0 rgba(0, 0, 0, 0.19)" : "inherit", 
     "display": "flex",
   };
 
