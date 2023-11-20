@@ -27,7 +27,7 @@ function Column({column, items, searchValue, isDragDisabled}) {
   const title = column.title;
 
   const displayItems = searchValue.length === 0 ? items : items.filter((item) =>
-    item.content.includes(searchValue)
+    item.content.toLowerCase().includes(searchValue.toLowerCase())
   );
   
   return (
