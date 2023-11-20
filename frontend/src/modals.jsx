@@ -7,12 +7,12 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
-export default function NewItemDialog({category, dialogOpen, setDialogOpen}) {
+export default function NewItemDialog({category, dialogOpen, setDialogOpen, onNewItemSubmit}) {
 const [newItem, setNewItem] = React.useState("");
   const handleClose = () => {setDialogOpen(false);};
   
   const onSubmit = () => {
-    console.log("Submitting: " + newItem);
+    onNewItemSubmit(newItem);
     handleClose();
   }
   return (

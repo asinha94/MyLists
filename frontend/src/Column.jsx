@@ -5,7 +5,7 @@ import { Droppable, DragDropContext } from 'react-beautiful-dnd';
 import { isMobile } from 'react-device-detect';
 import Item from './Item'
 import NewItemDialog from './modals';
-import { sendReorderedItem } from './services';
+import { sendReorderedItem, sendNewItem } from './services';
 
 const columnStyle = {
   "margin": "8px",
@@ -35,7 +35,7 @@ const PlusIcon = createSvgIcon(
 );
 
 
-function TitleBar({title}) {
+function TitleBar({title, onNewItemSubmit}) {
   const [dialogOpen, setDialogOpen] = React.useState(false);
 
   const titleSyle = {
@@ -65,13 +65,14 @@ function TitleBar({title}) {
         category={title}
         dialogOpen={dialogOpen}
         setDialogOpen={setDialogOpen}
+        onNewItemSubmit={onNewItemSubmit}
       />
     </div>
   )
 }
 
 
-function Column({column, items, searchValue, isDragDisabled}) {
+function Column({column, items, searchValue, isDragDisabled, onNewItemSubmit}) {
   const title = column.title;
 
   const displayItems = searchValue.length === 0 ? items : items.filter((item) =>
@@ -80,7 +81,7 @@ function Column({column, items, searchValue, isDragDisabled}) {
   
   return (
     <div style={columnStyle}>
-      <TitleBar title={title}/>
+      <TitleBar title={title} onNewItemSubmit={onNewItemSubmit}/>
       <Droppable droppableId={column.id} type={title}>
         {(provided, snaphshot) => {
           const style = {
@@ -156,9 +157,9 @@ function Category({categoryData, searchValue, isDragDisabled}) {
     }
   
     // Remove from old position, insert into new
-    const newItems = Array.from(data.items)
+    const newItems = Array.from(data.items);
     const [item] = newItems.splice(source.index, 1);
-    newItems.splice(destination.index, 0, item)
+    newItems.splice(destination.index, 0, item);
     const newData = {
       ...data,
       items: newItems
@@ -179,8 +180,41 @@ function Category({categoryData, searchValue, isDragDisabled}) {
       // Unfortunately needs a re-render
       newItems[destination.index] = newItem;
       setData(newData);
-    })
+    });
   }
+
+  const onNewItemSubmit = (newtitle) => {
+    const newItem = {
+      id: "0",
+      content: newtitle,
+      order_key: ""
+    };
+
+    // Insert into item array at the top
+    const newItems = Array.from(data.items);
+    newItems.splice(0, 0, newItem);
+    const newData = {
+      ...data,
+      items: newItems
+    };
+
+    // We have to call this once initially or else the card
+    // will immediately teleport back to its original location
+    //setData(newData);
+
+    // Send new item to backend
+    const changeDelta = createChangeDelta(0, newItems);
+    sendNewItem(changeDelta).then(newItem => {
+      // Revert to old list if failed
+      if (newItem === null) {
+        //setData(data);
+        return;
+      }
+
+      newItems[0] = newItem;
+      setData(newData);
+    });
+  };
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -190,6 +224,7 @@ function Category({categoryData, searchValue, isDragDisabled}) {
         items={data.items}
         searchValue={searchValue}
         isDragDisabled={isDragDisabled}
+        onNewItemSubmit={onNewItemSubmit}
       />
     </DragDropContext>
   );

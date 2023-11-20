@@ -1,6 +1,5 @@
 
-use sqlx::{Connection, PgConnection};
-
+use sqlx::{Connection, PgConnection, Row};
 
 const USER: &str = "web";
 const PASSWORD: &str = "password";
@@ -42,13 +41,36 @@ pub async fn update_item_order(id: i32, order_key: &String) {
     let connuri = get_postgres_connect_uri();
     let mut conn = PgConnection::connect(&connuri).await.unwrap();
 
-    sqlx::query_as::<_, DBItem>("
+    sqlx::query("
         UPDATE items
         SET order_key = $1
         WHERE id = $2")
         .bind(order_key)
         .bind(id)
-        .fetch_all(&mut conn)
+        .execute(&mut conn)
         .await
         .unwrap();
+}
+
+
+pub async fn insert_item(category: &String, title: &String, order_key: &String) -> i32 {
+    let connuri = get_postgres_connect_uri();
+    let mut conn = PgConnection::connect(&connuri).await.unwrap();
+
+    let row = sqlx::query("
+        INSERT INTO items (category_id, title, order_key)
+        SELECT id, $1, $2 FROM categories
+        WHERE category_title = $3
+        ON CONFLICT (title) DO UPDATE
+        SET order_key = $4
+        RETURNING id")
+        .bind(title)
+        .bind(order_key)
+        .bind(category)
+        .bind(order_key)
+        .fetch_one(&mut conn)
+        .await
+        .unwrap();
+
+        row.get::<i32, _>("id")
 }
