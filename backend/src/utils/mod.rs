@@ -22,12 +22,12 @@ mod tests {
         assert_eq!(get_char_midpoint('a', 'b'), 'a');
         assert_eq!(get_char_midpoint('a', 'z'), 'm');
 
+        test_cmp("keyabc", "keyabdm");
         test_cmp("keyan", "keybcdm");
         test_cmp("keya", "keyb");
         test_cmp("keyaaaa", "keybbbb");
-
-
-
+        test_cmp("", "keyaaaamm");
+        test_cmp("", "keyaaaaammmm");
     }
 }
 
@@ -72,7 +72,7 @@ pub fn get_keys_midpoint(key_first: &String, key_second: &String) -> String {
     if key_first_len == key_second_len {
         middle.clone_from(key_first);
         middle.push('m');
-        return middle
+        return middle;
     }
 
     // Iterate through strings till we hit the first difference
@@ -84,7 +84,6 @@ pub fn get_keys_midpoint(key_first: &String, key_second: &String) -> String {
     let middle_key = loop {
         let char_first = key_first_iter.next();
         let char_second = key_second_iter.next();
-
         // Both keys are the same. Should never happen
         // This means the key gets sorted after both keys
         // but the precondition has already been broken
@@ -145,16 +144,6 @@ pub fn get_keys_midpoint(key_first: &String, key_second: &String) -> String {
     // Push the midpoint char and an 'm' so that we can always push before/after
     middle.push(middle_key);
     middle.push('m');
-
-    // Make sure new key is as long as the old key size
-    let max_key_size = cmp::max(key_first.len(), key_second.len());
-    if middle.len() <  max_key_size {
-        let diff = max_key_size - middle.len();
-        for _ in 0..diff {
-            middle.push('m');
-        }
-        return middle;
-    }
 
     // This is possible when we get 2 consecutive keys
     // e.g "keyabcm" vs "keyabd". "keyabcm" will be created again
