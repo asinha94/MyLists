@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { createSvgIcon } from '@mui/material/utils';
+import IconButton from '@mui/material/IconButton';
 import { Droppable, DragDropContext } from 'react-beautiful-dnd';
 import { isMobile } from 'react-device-detect';
 import Item from './Item'
@@ -11,15 +13,53 @@ const columnStyle = {
   "width": isMobile ? "inherit" : "300px"
 }
 
-const titleSyle = {
-  "padding": "8px",
-  "fontFamily": "'Courier New', monospace"
-}
-
 const itemListStyle = {
   "padding": "8px",
   "flexGrow": 1,
   "minHeight": "100px"
+}
+
+const PlusIcon = createSvgIcon(
+  // credit: plus icon from https://heroicons.com/
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+    </svg>,
+    'Plus',
+);
+
+
+function TitleBar({title}) {
+  const titleSyle = {
+    "padding": "8px",
+    "fontFamily": "'Courier New', monospace",
+    "justifyContent": "center",
+    "textAlign": "center"
+  }
+
+  const divStyle = {
+    "display": "flex",
+    "alignItems": "center",
+    "justifyContent": "center",
+  }
+
+  const plusOnClick = (event) => {
+    console.log("Click event for " + title);
+  }
+
+  return (
+    <div style={divStyle}>
+      <h3 style={titleSyle}>{title}</h3>
+      <IconButton aria-label="Example" onClick={plusOnClick}>
+        <PlusIcon />
+      </IconButton>
+    </div>
+  )
 }
 
 
@@ -32,7 +72,7 @@ function Column({column, items, searchValue, isDragDisabled}) {
   
   return (
     <div style={columnStyle}>
-      <h3 style={titleSyle}>{title}</h3>
+      <TitleBar title={title}/>
       <Droppable droppableId={column.id} type={title}>
         {(provided, snaphshot) => {
           const style = {
