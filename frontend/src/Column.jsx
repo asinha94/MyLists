@@ -23,7 +23,7 @@ const itemListStyle = {
 }
 
 
-function Column({column, items}) {
+function Column({column, items, isDragDisabled}) {
   const title = column.title;
   
   return (
@@ -31,7 +31,6 @@ function Column({column, items}) {
       <h3 style={titleSyle}>{title}</h3>
       <Droppable droppableId={column.id} type={title}>
         {(provided, snaphshot) => {
-
           const style = {
             ...provided.droppableProps.style,
             ...itemListStyle
@@ -43,7 +42,7 @@ function Column({column, items}) {
             {...provided.droppableProps}
             style={style}
           >
-            {items.map((item, index) => <Item key={item.id} item={item} index={index} title={title}/>)}
+            {items.map((item, index) => <Item key={item.id} item={item} index={index} title={title} isDragDisabled={isDragDisabled}/>)}
             {provided.placeholder}
           </div>)
         }}
@@ -52,7 +51,7 @@ function Column({column, items}) {
   );
 }
 
-function Category({categoryData}) {
+function Category({categoryData, searchValue, isDragDisabled}) {
   const [data, setData] = useState(categoryData);
 
   const createChangeDelta = (newIndex, newItems) => {
@@ -127,18 +126,23 @@ function Category({categoryData}) {
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <Column key={data.id} column={data} items={data.items} />
+      <Column key={data.id} column={data} items={data.items} isDragDisabled={isDragDisabled}/>
     </DragDropContext>
   );
 }
 
 
-export default function Columns({loadedData, categories, selectedCategory}) {
+export default function Columns({loadedData, categories, searchValue, isDragDisabled, selectedCategory}) {
   if (isMobile) {
     if (selectedCategory) {
       const column = loadedData[selectedCategory];
       return (
-        <Category key={selectedCategory} categoryData={column} />
+        <Category
+          key={selectedCategory}
+          categoryData={column}
+          isDragDisabled={isDragDisabled}
+          searchValue={searchValue}
+        />
       )
     }
 
@@ -149,7 +153,12 @@ export default function Columns({loadedData, categories, selectedCategory}) {
     <div style={{display: "flex"}}>
       {categories.map(columnID => {
           const column = loadedData[columnID];
-          return <Category key={columnID} categoryData={column} />
+          return <Category
+            key={columnID}
+            categoryData={column}
+            isDragDisabled={isDragDisabled}
+            searchValue={searchValue}
+          />
         })}
     </div>
   )
