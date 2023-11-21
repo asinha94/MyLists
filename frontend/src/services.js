@@ -2,7 +2,8 @@ import { isEmpty } from "./utilities";
 
 const PROTOCOL = window.location.protocol;
 const HOST = window.location.hostname;
-const API_URL = `${PROTOCOL}//${HOST}/api`
+const PORT = 80;
+const API_URL = `${PROTOCOL}//${HOST}:${PORT}/api`
 
 export async function getInitialData(loadedData, setLoadedData) {
   
@@ -33,6 +34,34 @@ export async function sendReorderedItem(changeDelta) {
 
   try {
     const response = await fetch(API_URL + '/reorder', {
+      method: 'POST',
+      headers: {
+        'Accept': 'appplication/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(changeDelta)
+      }
+    );
+
+    if (!response.ok) {
+      console.log("Got error: " + response.statusText);
+      return null;
+    }
+
+    const responseData = await response.json();
+    return responseData
+
+  } catch(err) {
+    console.log(err.message);
+    return null;
+  }
+}
+
+
+export async function sendNewItem(changeDelta) {
+
+  try {
+    const response = await fetch(API_URL + '/insert', {
       method: 'POST',
       headers: {
         'Accept': 'appplication/json',
