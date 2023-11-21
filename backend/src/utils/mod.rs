@@ -2,7 +2,7 @@ use std::cmp;
 
 
 const FIRST_STRING: &str = "keyaaaa";
-const LAST_STRING: &str  = "keyzzzz";
+//const LAST_STRING: &str  = "keyzzzz";
 
 
 #[cfg(test)]

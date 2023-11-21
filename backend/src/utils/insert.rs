@@ -1,5 +1,5 @@
 #[path = "../sql.rs"]
-mod sql;
+pub mod sql;
 
 use std::fs;
 use std::collections::HashMap;
@@ -37,7 +37,6 @@ async fn insert_items() {
 
     let mut items_by_category = HashMap::new();
 
-    let mut count: i32 = 0;
     for line in f.lines() {
         let ls: Vec<&str> = line.split(",").collect();
         
@@ -54,7 +53,6 @@ async fn insert_items() {
             .or_insert(Vec::new());
 
         category_items.push(String::from(name));
-        count += 1;
     }
 
     
@@ -71,9 +69,8 @@ async fn insert_items() {
 
     // Create the key arrays. Start at b
     const BASE: u8 = 12;
-    let key_width = count.ilog(12) + 1;
     let mut chars: Vec<u8> = Vec::new();
-    for _ in 0..4 {
+    for _ in 0..5 {
         chars.push(0);
     }
 
