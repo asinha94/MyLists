@@ -2,7 +2,7 @@ import { isEmpty } from "./utilities";
 
 const PROTOCOL = window.location.protocol;
 const HOST = window.location.hostname;
-const PORT = 8000;
+const PORT = 80;
 const API_URL = `${PROTOCOL}//${HOST}:${PORT}/api`
 
 export async function getInitialData(loadedData, setLoadedData) {

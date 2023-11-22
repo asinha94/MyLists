@@ -45,10 +45,14 @@ export function NewItemDialog({category, dialogOpen, setDialogOpen, onNewItemSub
 }
 
 
-export function EditItemDialog({title, dialogOpen, setDialogOpen, setNewTitle}) {
+export function EditItemDialog({title, dialogOpen, setDialogOpen, setNewTitle, handleCloseState}) {
   const [editedTitle, setEditedTitle] = React.useState(title);
   
-  const handleClose = () => {setDialogOpen(false);};
+  const handleClose = () => {
+    setDialogOpen(false);
+    handleCloseState();
+  };
+
   const onSubmit = () => {
     
     // Check for null value and changed value
@@ -86,8 +90,12 @@ export function EditItemDialog({title, dialogOpen, setDialogOpen, setNewTitle}) 
 }
 
 
-export function DeleteItemDialog({title, dialogOpen, setDialogOpen, deleteTitle}) {
-  const handleClose = () => {setDialogOpen(false);};
+export function DeleteItemDialog({title, dialogOpen, setDialogOpen, deleteTitle, handleCloseState}) {
+  const handleClose = () => {
+    setDialogOpen(false);
+    handleCloseState();
+  };
+
   const onSubmit = () => {
     //deleteTitle(newItem);
     handleClose();

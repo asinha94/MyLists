@@ -6,7 +6,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import { EditItemDialog, DeleteItemDialog } from './modals'
 
 
-function IconModal({label, title, IconType, DialogModal}) {
+function IconModal({label, title, IconType, DialogModal, handleCloseState}) {
   const [dialogOpen, setDialogOpen] = useState(false);
   return (
     <div>
@@ -17,12 +17,13 @@ function IconModal({label, title, IconType, DialogModal}) {
         title={title}
         dialogOpen={dialogOpen}
         setDialogOpen={setDialogOpen}
+        handleCloseState={handleCloseState}
       />
     </div>
   );
 }
 
-function ItemIcons({title}) {
+function ItemIcons({title, handleCloseState}) {
   const style = {
     "marginLeft": "auto",
     "alignItems": "flex-start",
@@ -36,12 +37,14 @@ function ItemIcons({title}) {
         title={title}
         IconType={EditIcon}
         DialogModal={EditItemDialog}
+        handleCloseState={handleCloseState}
       />
       <IconModal
         label="delete"
         title={title}
         IconType={DeleteIcon}
         DialogModal={DeleteItemDialog}
+        handleCloseState={handleCloseState}
       />        
     </div>
   );
@@ -82,7 +85,12 @@ function ItemContainer({index, item, provided, snaphshot, isDragDisabled}) {
       onMouseOutCapture={() =>  {setIsHovering(false)}}
     >
       {index+1 + '.' + item.content}
-      {isHovering && <ItemIcons title={item.content} />}
+      {isHovering && 
+        <ItemIcons
+          title={item.content}
+          handleCloseState={() => {setIsHovering(false)}}
+        />
+      }
     </div>
   );
 }
