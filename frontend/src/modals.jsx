@@ -50,14 +50,18 @@ export function EditItemDialog({title, dialogOpen, setDialogOpen, setNewTitle}) 
   
   const handleClose = () => {setDialogOpen(false);};
   const onSubmit = () => {
-    //setNewTitle(newItem);
+    
+    // Check for null value and changed value
+    if (editedTitle === "" && editedTitle ===  title) {
+      //setNewTitle(newItem);
+    }
     handleClose();
   }
 
   return (
     <React.Fragment>
       <Dialog open={dialogOpen} onClose={handleClose}>
-        <DialogTitle>Set new 'unit' title</DialogTitle>
+        <DialogTitle>Set new title</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
@@ -66,6 +70,7 @@ export function EditItemDialog({title, dialogOpen, setDialogOpen, setNewTitle}) 
             label="Title"
             type="text"
             fullWidth
+            defaultValue={editedTitle}
             variant="standard"
             onChange={(e) => {
               setEditedTitle(e.target.value)
