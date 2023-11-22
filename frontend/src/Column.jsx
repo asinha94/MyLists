@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { createSvgIcon } from '@mui/material/utils';
 import IconButton from '@mui/material/IconButton';
+import AddIcon from '@mui/icons-material/Add';
 import { Droppable, DragDropContext } from 'react-beautiful-dnd';
 import { isMobile } from 'react-device-detect';
 import Item from './Item'
-import NewItemDialog from './modals';
+import { NewItemDialog } from './modals';
 import { sendReorderedItem, sendNewItem } from './services';
 
 const columnStyle = {
@@ -19,21 +19,6 @@ const itemListStyle = {
   "flexGrow": 1,
   "minHeight": "100px"
 }
-
-const PlusIcon = createSvgIcon(
-  // credit: plus icon from https://heroicons.com/
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={1.5}
-      stroke="currentColor"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-    </svg>,
-    'Plus',
-);
-
 
 function TitleBar({title, onNewItemSubmit}) {
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -59,7 +44,7 @@ function TitleBar({title, onNewItemSubmit}) {
     <div style={divStyle}>
       <h3 style={titleSyle}>{title}</h3>
       <IconButton aria-label="Example" onClick={plusOnClick}>
-        <PlusIcon />
+        <AddIcon />
       </IconButton>
       <NewItemDialog
         category={title}

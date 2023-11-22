@@ -1,5 +1,48 @@
 import React, { useState} from 'react';
 import { Draggable } from 'react-beautiful-dnd';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import { EditItemDialog, DeleteItemDialog } from './modals'
+
+
+function ItemIcons({title, isHovering}) {
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  
+  const style = {
+    "marginLeft": "auto",
+    "alignItems": "flex-start",
+    "minWidth": 0
+  }
+
+  if (isHovering) {
+    return (
+      <div style={style}>
+        <IconButton aria-label="edit" onClick={() => { setEditDialogOpen(true)}}>
+          <EditIcon fontSize='small'/>
+        </IconButton>
+        <EditItemDialog
+          title={title}
+          dialogOpen={editDialogOpen}
+          setDialogOpen={setEditDialogOpen}
+        />
+
+        <IconButton aria-label="delete" onClick={() => {setDeleteDialogOpen(true)}}>
+          <DeleteIcon fontSize='small'/>
+        </IconButton>
+        <DeleteItemDialog
+          title={title}
+          dialogOpen={deleteDialogOpen}
+          setDialogOpen={setDeleteDialogOpen}
+        />
+        
+      </div>
+    );
+  }
+  
+  return <div/>;
+}
 
 
 function ItemContainer({index, item, provided, snaphshot, isDragDisabled}) {
@@ -36,6 +79,10 @@ function ItemContainer({index, item, provided, snaphshot, isDragDisabled}) {
       onMouseOutCapture={() =>  {setIsHovering(false)}}
     >
       {index+1 + '.' + item.content}
+      <ItemIcons
+        title={item.content}
+        isHovering={isHovering}
+      />
     </div>
   );
 }
