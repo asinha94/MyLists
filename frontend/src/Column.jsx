@@ -61,9 +61,9 @@ function Column({column, items, searchValue, isDragDisabled, onNewItemSubmit, On
   const title = column.title;
 
   const searchValueLowerCase = searchValue.toLowerCase();
-  const indexedItems = items.map((item, index) => [item, index]);
-  const displayItems = searchValue.length === 0 ? indexedItems : indexedItems.filter((item) =>
-    item[0].content.toLowerCase().includes(searchValueLowerCase)
+  const indexedItems = items.map((item, index) => { return {'item': item, 'index': index} } );
+  const displayItems = searchValue.length === 0 ? indexedItems : indexedItems.filter((entry) =>
+    entry.item.content.toLowerCase().includes(searchValueLowerCase)
   );
   
   return (
@@ -82,11 +82,11 @@ function Column({column, items, searchValue, isDragDisabled, onNewItemSubmit, On
             {...provided.droppableProps}
             style={style}
           >
-            {displayItems.map((itemIndex,) =>
+            {displayItems.map((entry) =>
               <Item
-                key={itemIndex[0].id}
-                item={itemIndex[0]}
-                index={itemIndex[1]}
+                key={entry.item.id}
+                item={entry.item}
+                index={entry.index}
                 title={title}
                 isDragDisabled={isDragDisabled}
                 OnItemEditSet={OnItemEditSet}
