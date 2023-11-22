@@ -45,7 +45,7 @@ export function NewItemDialog({category, dialogOpen, setDialogOpen, onNewItemSub
 }
 
 
-export function EditItemDialog({title, dialogOpen, setDialogOpen, setNewTitle, handleCloseState}) {
+export function EditItemDialog({index, title, dialogOpen, setDialogOpen, handleCloseState, handleItemUpdate}) {
   const [editedTitle, setEditedTitle] = React.useState(title);
   
   const handleClose = () => {
@@ -54,10 +54,9 @@ export function EditItemDialog({title, dialogOpen, setDialogOpen, setNewTitle, h
   };
 
   const onSubmit = () => {
-    
     // Check for null value and changed value
-    if (editedTitle === "" && editedTitle ===  title) {
-      //setNewTitle(newItem);
+    if (editedTitle !== "" && editedTitle !==  title) {
+      handleItemUpdate(index, editedTitle);
     }
     handleClose();
   }
@@ -90,7 +89,7 @@ export function EditItemDialog({title, dialogOpen, setDialogOpen, setNewTitle, h
 }
 
 
-export function DeleteItemDialog({title, dialogOpen, setDialogOpen, deleteTitle, handleCloseState}) {
+export function DeleteItemDialog({index, title, dialogOpen, setDialogOpen, handleCloseState, HandleItemUpdate}) {
   const handleClose = () => {
     setDialogOpen(false);
     handleCloseState();

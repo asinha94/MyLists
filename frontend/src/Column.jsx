@@ -5,7 +5,7 @@ import { Droppable, DragDropContext } from 'react-beautiful-dnd';
 import { isMobile } from 'react-device-detect';
 import Item from './Item'
 import { NewItemDialog } from './modals';
-import { sendReorderedItem, sendNewItem } from './services';
+import { sendReorderedItem, sendNewItem, sendUpdatedItem } from './services';
 
 const columnStyle = {
   "margin": "8px",
@@ -57,11 +57,13 @@ function TitleBar({title, onNewItemSubmit}) {
 }
 
 
-function Column({column, items, searchValue, isDragDisabled, onNewItemSubmit}) {
+function Column({column, items, searchValue, isDragDisabled, onNewItemSubmit, OnItemEditSet}) {
   const title = column.title;
 
-  const displayItems = searchValue.length === 0 ? items : items.filter((item) =>
-    item.content.toLowerCase().includes(searchValue.toLowerCase())
+  const searchValueLowerCase = searchValue.toLowerCase();
+  const indexedItems = items.map((item, index) => [item, index]);
+  const displayItems = searchValue.length === 0 ? indexedItems : indexedItems.filter((item) =>
+    item[0].content.toLowerCase().includes(searchValueLowerCase)
   );
   
   return (
@@ -80,13 +82,14 @@ function Column({column, items, searchValue, isDragDisabled, onNewItemSubmit}) {
             {...provided.droppableProps}
             style={style}
           >
-            {displayItems.map((item, index) =>
+            {displayItems.map((itemIndex,) =>
               <Item
-                key={item.id}
-                item={item}
-                index={index}
+                key={itemIndex[0].id}
+                item={itemIndex[0]}
+                index={itemIndex[1]}
                 title={title}
                 isDragDisabled={isDragDisabled}
+                OnItemEditSet={OnItemEditSet}
               />)}
             {provided.placeholder}
           </div>)
@@ -150,12 +153,17 @@ function Category({categoryData, searchValue, isDragDisabled}) {
       items: newItems
     }
 
+    // This needs to be set initially or else we get a jitter affect
+    // as the API needs a second to process the change
+    // When the response comes in, react realizes it doesnt need to re-render
+    // So it doesnt feel jittery
     setData(newData);
 
     // Send update to backend and hopefully get a response
     const changeDelta = createChangeDelta(destination.index, newItems);
     sendReorderedItem(changeDelta).then(newItem => {
       // Re-render the old list if there is an error
+      // TODO: toast message
       if (newItem === null) {
         setData(data);
         return;
@@ -183,23 +191,36 @@ function Category({categoryData, searchValue, isDragDisabled}) {
       items: newItems
     };
 
-    // We have to call this once initially or else the card
-    // will immediately teleport back to its original location
-    //setData(newData);
-
     // Send new item to backend
     const changeDelta = createChangeDelta(0, newItems);
     sendNewItem(changeDelta).then(newItem => {
-      // Revert to old list if failed
-      if (newItem === null) {
-        //setData(data);
-        return;
+      // If the update was successful, re-render with the new item
+      if (newItem !== null) {
+        newItems[0] = newItem;
+        setData(newData);
       }
-
-      newItems[0] = newItem;
-      setData(newData);
     });
   };
+
+  const OnItemEditSet = (index, newTitle) => {
+    
+    const newItems = Array.from(data.items);
+    const editedItem = {...newItems[index]};
+    editedItem.content = newTitle;
+
+    const newData = {
+      ...data,
+      items: newItems
+    };
+
+    sendUpdatedItem(editedItem).then(newItem => {
+      if (newItem !== null) {
+        newItems[index] = newItem;
+        setData(newData);
+      }
+    })
+
+  }
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -210,6 +231,7 @@ function Category({categoryData, searchValue, isDragDisabled}) {
         searchValue={searchValue}
         isDragDisabled={isDragDisabled}
         onNewItemSubmit={onNewItemSubmit}
+        OnItemEditSet={OnItemEditSet}
       />
     </DragDropContext>
   );

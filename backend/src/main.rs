@@ -61,6 +61,18 @@ async fn insert_item(body: web::Json<api::ChangeDelta>) -> impl Responder {
 }
 
 
+#[post("/api/update")]
+async fn update_item_title(body: web::Json<api::UIItem>) -> impl Responder {
+    let item = body.0;
+    let item_id = item.id.parse().unwrap();
+
+    // Make SQL query
+    sql::update_item_title(item_id, &item.content).await;
+
+    println!("Item ({}) title updated to {}", item.id, item.content);
+    HttpResponse::Ok().body(serde_json::to_string(&item).unwrap())
+}
+
 
 #[get("/api/items")]
 async fn get_all_items() -> impl Responder {
@@ -94,6 +106,7 @@ async fn main() -> std::io::Result<()>{
         .service(get_all_items)
         .service(reorder_item)
         .service(insert_item)
+        .service(update_item_title)
         .wrap(Cors::permissive())
         .wrap(Logger::default())
     })

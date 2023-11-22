@@ -6,7 +6,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import { EditItemDialog, DeleteItemDialog } from './modals'
 
 
-function IconModal({label, title, IconType, DialogModal, handleCloseState}) {
+function IconModal({label, index, title, IconType, DialogModal, handleCloseState, handleItemUpdate}) {
   const [dialogOpen, setDialogOpen] = useState(false);
   return (
     <div>
@@ -14,16 +14,18 @@ function IconModal({label, title, IconType, DialogModal, handleCloseState}) {
         <IconType fontSize='small'/>
       </IconButton>
       <DialogModal
+        index={index}
         title={title}
         dialogOpen={dialogOpen}
         setDialogOpen={setDialogOpen}
         handleCloseState={handleCloseState}
+        handleItemUpdate={handleItemUpdate}
       />
     </div>
   );
 }
 
-function ItemIcons({title, handleCloseState}) {
+function ItemIcons({index, title, handleCloseState, OnItemEditSet}) {
   const style = {
     "marginLeft": "auto",
     "alignItems": "flex-start",
@@ -34,13 +36,16 @@ function ItemIcons({title, handleCloseState}) {
     <div style={style}>
       <IconModal
         label="edit"
+        index={index}
         title={title}
         IconType={EditIcon}
         DialogModal={EditItemDialog}
         handleCloseState={handleCloseState}
+        handleItemUpdate={OnItemEditSet}
       />
       <IconModal
         label="delete"
+        index={index}
         title={title}
         IconType={DeleteIcon}
         DialogModal={DeleteItemDialog}
@@ -51,7 +56,7 @@ function ItemIcons({title, handleCloseState}) {
 }
 
 
-function ItemContainer({index, item, provided, snaphshot, isDragDisabled}) {
+function ItemContainer({index, item, provided, snaphshot, isDragDisabled, OnItemEditSet}) {
   const [isHovering, setIsHovering] = useState(false);
   const draggableProps = provided.draggableProps;
   const dragHandleProps = provided.dragHandleProps;
@@ -87,15 +92,17 @@ function ItemContainer({index, item, provided, snaphshot, isDragDisabled}) {
       {index+1 + '.' + item.content}
       {isHovering && 
         <ItemIcons
+          index={index}
           title={item.content}
           handleCloseState={() => {setIsHovering(false)}}
+          OnItemEditSet={OnItemEditSet}
         />
       }
     </div>
   );
 }
 
-export default function ItemDraggable({item, index, title, isDragDisabled}) {
+export default function ItemDraggable({item, index, title, isDragDisabled, OnItemEditSet}) {
     return (
       <Draggable draggableId={item.id} index={index} type={title} isDragDisabled={isDragDisabled}>
         {(provided, snaphshot) => (
@@ -105,6 +112,7 @@ export default function ItemDraggable({item, index, title, isDragDisabled}) {
             provided={provided}
             snaphshot={snaphshot}
             isDragDisabled={isDragDisabled}
+            OnItemEditSet={OnItemEditSet}
           />
         )}
       </Draggable>
