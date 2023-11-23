@@ -84,3 +84,31 @@ export async function sendNewItem(changeDelta) {
     return null;
   }
 }
+
+
+export async function sendUpdatedItem(item) {
+
+  try {
+    const response = await fetch(API_URL + '/update', {
+      method: 'POST',
+      headers: {
+        'Accept': 'appplication/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(item)
+      }
+    );
+
+    if (!response.ok) {
+      console.log("Got error: " + response.statusText);
+      return null;
+    }
+
+    const responseData = await response.json();
+    return responseData
+
+  } catch(err) {
+    console.log(err.message);
+    return null;
+  }
+}

@@ -36,7 +36,6 @@ pub async fn get_all_items() -> Vec<DBItem> {
         .unwrap()
 }
 
-
 pub async fn update_item_order(id: i32, order_key: &String) {
     let connuri = get_postgres_connect_uri();
     let mut conn = PgConnection::connect(&connuri).await.unwrap();
@@ -73,4 +72,20 @@ pub async fn insert_item(category: &String, title: &String, order_key: &String) 
         .unwrap();
 
         row.get::<i32, _>("id")
+}
+
+
+pub async fn update_item_title(id: i32, title: &String) {
+    let connuri = get_postgres_connect_uri();
+    let mut conn = PgConnection::connect(&connuri).await.unwrap();
+
+    sqlx::query("
+        UPDATE items
+        SET title = $1
+        WHERE id = $2")
+        .bind(title)
+        .bind(id)
+        .execute(&mut conn)
+        .await
+        .unwrap();
 }

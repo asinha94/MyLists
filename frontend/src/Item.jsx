@@ -1,8 +1,62 @@
 import React, { useState} from 'react';
 import { Draggable } from 'react-beautiful-dnd';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import { EditItemDialog, DeleteItemDialog } from './modals'
 
 
-function ItemContainer({index, item, provided, snaphshot, isDragDisabled}) {
+function IconModal({label, index, title, IconType, DialogModal, handleCloseState, handleItemUpdate}) {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  return (
+    <div>
+      <IconButton aria-label={label} onClick={() => { setDialogOpen(true) }}>
+        <IconType fontSize='small'/>
+      </IconButton>
+      <DialogModal
+        index={index}
+        title={title}
+        dialogOpen={dialogOpen}
+        setDialogOpen={setDialogOpen}
+        handleCloseState={handleCloseState}
+        handleItemUpdate={handleItemUpdate}
+      />
+    </div>
+  );
+}
+
+function ItemIcons({index, title, handleCloseState, OnItemEditSet}) {
+  const style = {
+    "marginLeft": "auto",
+    "alignItems": "flex-start",
+    "minWidth": 0
+  }
+
+  return (
+    <div style={style}>
+      <IconModal
+        label="edit"
+        index={index}
+        title={title}
+        IconType={EditIcon}
+        DialogModal={EditItemDialog}
+        handleCloseState={handleCloseState}
+        handleItemUpdate={OnItemEditSet}
+      />
+      <IconModal
+        label="delete"
+        index={index}
+        title={title}
+        IconType={DeleteIcon}
+        DialogModal={DeleteItemDialog}
+        handleCloseState={handleCloseState}
+      />        
+    </div>
+  );
+}
+
+
+function ItemContainer({index, item, provided, snaphshot, isDragDisabled, OnItemEditSet}) {
   const [isHovering, setIsHovering] = useState(false);
   const draggableProps = provided.draggableProps;
   const dragHandleProps = provided.dragHandleProps;
@@ -36,11 +90,19 @@ function ItemContainer({index, item, provided, snaphshot, isDragDisabled}) {
       onMouseOutCapture={() =>  {setIsHovering(false)}}
     >
       {index+1 + '.' + item.content}
+      {isHovering && 
+        <ItemIcons
+          index={index}
+          title={item.content}
+          handleCloseState={() => {setIsHovering(false)}}
+          OnItemEditSet={OnItemEditSet}
+        />
+      }
     </div>
   );
 }
 
-export default function ItemDraggable({item, index, title, isDragDisabled}) {
+export default function ItemDraggable({item, index, title, isDragDisabled, OnItemEditSet}) {
     return (
       <Draggable draggableId={item.id} index={index} type={title} isDragDisabled={isDragDisabled}>
         {(provided, snaphshot) => (
@@ -50,6 +112,7 @@ export default function ItemDraggable({item, index, title, isDragDisabled}) {
             provided={provided}
             snaphshot={snaphshot}
             isDragDisabled={isDragDisabled}
+            OnItemEditSet={OnItemEditSet}
           />
         )}
       </Draggable>
