@@ -61,7 +61,7 @@ export async function sendReorderedItem(changeDelta) {
 export async function sendNewItem(changeDelta) {
 
   try {
-    const response = await fetch(API_URL + '/insert', {
+    const response = await fetch(API_URL + '/item', {
       method: 'POST',
       headers: {
         'Accept': 'appplication/json',
@@ -89,8 +89,8 @@ export async function sendNewItem(changeDelta) {
 export async function sendUpdatedItem(item) {
 
   try {
-    const response = await fetch(API_URL + '/update', {
-      method: 'POST',
+    const response = await fetch(API_URL + '/item', {
+      method: 'PUT',
       headers: {
         'Accept': 'appplication/json',
         'Content-Type': 'application/json'
@@ -106,6 +106,33 @@ export async function sendUpdatedItem(item) {
 
     const responseData = await response.json();
     return responseData
+
+  } catch(err) {
+    console.log(err.message);
+    return null;
+  }
+}
+
+
+export async function deleteItem(item) {
+
+  try {
+    const response = await fetch(API_URL + '/item', {
+      method: 'DELETE',
+      headers: {
+        'Accept': 'appplication/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(item)
+      }
+    );
+
+    if (!response.ok) {
+      console.log("Got error: " + response.statusText);
+      return false;
+    }
+
+    return true;
 
   } catch(err) {
     console.log(err.message);

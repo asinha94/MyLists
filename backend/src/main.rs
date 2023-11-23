@@ -5,7 +5,7 @@ mod utils;
 
 use std::collections::HashMap;
 use env_logger::Env;
-use actix_web::{get, post, web, App, HttpServer, Responder, HttpResponse, middleware::Logger};
+use actix_web::{get, post, put, delete, web, App, HttpServer, Responder, HttpResponse, middleware::Logger};
 use actix_cors::Cors;
 use serde_json;
 
@@ -36,7 +36,7 @@ async fn reorder_item(body: web::Json<api::ChangeDelta>) -> impl Responder {
 }
 
 
-#[post("/api/insert")]
+#[post("/api/item")]
 async fn insert_item(body: web::Json<api::ChangeDelta>) -> impl Responder {
     let change_delta = body.0;
     
@@ -61,7 +61,7 @@ async fn insert_item(body: web::Json<api::ChangeDelta>) -> impl Responder {
 }
 
 
-#[post("/api/update")]
+#[put("/api/item")]
 async fn update_item_title(body: web::Json<api::UIItem>) -> impl Responder {
     let item = body.0;
     let item_id = item.id.parse().unwrap();
@@ -73,6 +73,18 @@ async fn update_item_title(body: web::Json<api::UIItem>) -> impl Responder {
     HttpResponse::Ok().body(serde_json::to_string(&item).unwrap())
 }
 
+
+#[delete("/api/item")]
+async fn delete_item(body: web::Json<api::UIItem>) -> impl Responder {
+    let item = body.0;
+    let item_id = item.id.parse().unwrap();
+
+    // Make SQL query
+    sql::delete_item(item_id).await;
+
+    println!("Item ({}) title updated to {}", item.id, item.content);
+    HttpResponse::Ok().body(serde_json::to_string(&item).unwrap())
+}
 
 #[get("/api/items")]
 async fn get_all_items() -> impl Responder {
@@ -107,6 +119,7 @@ async fn main() -> std::io::Result<()>{
         .service(reorder_item)
         .service(insert_item)
         .service(update_item_title)
+        .service(delete_item)
         .wrap(Cors::permissive())
         .wrap(Logger::default())
     })

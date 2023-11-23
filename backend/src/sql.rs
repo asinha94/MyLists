@@ -89,3 +89,17 @@ pub async fn update_item_title(id: i32, title: &String) {
         .await
         .unwrap();
 }
+
+
+pub async fn delete_item(id: i32) {
+    let connuri = get_postgres_connect_uri();
+    let mut conn = PgConnection::connect(&connuri).await.unwrap();
+
+    sqlx::query("
+        DELETE FROM items
+        WHERE id = $1")
+        .bind(id)
+        .execute(&mut conn)
+        .await
+        .unwrap();
+}

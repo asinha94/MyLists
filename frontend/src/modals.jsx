@@ -89,20 +89,20 @@ export function EditItemDialog({index, title, dialogOpen, setDialogOpen, handleC
 }
 
 
-export function DeleteItemDialog({index, title, dialogOpen, setDialogOpen, handleCloseState, HandleItemUpdate}) {
+export function DeleteItemDialog({index, title, dialogOpen, setDialogOpen, handleCloseState, handleItemUpdate}) {
   const handleClose = () => {
     setDialogOpen(false);
     handleCloseState();
   };
 
   const onSubmit = () => {
-    //deleteTitle(newItem);
+    handleItemUpdate(index);
     handleClose();
   }
   return (
     <React.Fragment>
       <Dialog open={dialogOpen} onClose={handleClose}>
-        <DialogTitle>Delete {title}?</DialogTitle>
+        <DialogTitle>Delete '{title}'?</DialogTitle>
         <DialogContent>
           <DialogContentText>
             This cannot be undone
