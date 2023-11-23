@@ -5,7 +5,7 @@ import { Droppable, DragDropContext } from 'react-beautiful-dnd';
 import { isMobile } from 'react-device-detect';
 import Item from './Item'
 import { NewItemDialog } from './modals';
-import { sendReorderedItem, sendNewItem, sendUpdatedItem } from './services';
+import { sendReorderedItem, sendNewItem, sendUpdatedItem, deleteItem } from './services';
 
 const columnStyle = {
   "margin": "8px",
@@ -57,7 +57,7 @@ function TitleBar({title, onNewItemSubmit}) {
 }
 
 
-function Column({column, items, searchValue, isDragDisabled, onNewItemSubmit, OnItemEditSet}) {
+function Column({column, items, searchValue, isDragDisabled, onNewItemSubmit, OnItemEditSet, OnItemDeleteConfirm}) {
   const title = column.title;
 
   const searchValueLowerCase = searchValue.toLowerCase();
@@ -90,6 +90,7 @@ function Column({column, items, searchValue, isDragDisabled, onNewItemSubmit, On
                 title={title}
                 isDragDisabled={isDragDisabled}
                 OnItemEditSet={OnItemEditSet}
+                OnItemDeleteConfirm={OnItemDeleteConfirm}
               />)}
             {provided.placeholder}
           </div>)
@@ -203,7 +204,6 @@ function Category({categoryData, searchValue, isDragDisabled}) {
   };
 
   const OnItemEditSet = (index, newTitle) => {
-    
     const newItems = Array.from(data.items);
     const editedItem = {...newItems[index]};
     editedItem.content = newTitle;
@@ -222,6 +222,26 @@ function Category({categoryData, searchValue, isDragDisabled}) {
 
   }
 
+  const OnItemDeleteConfirm = (index) => {
+    
+    // Remove from list
+    const newItems = Array.from(data.items);
+    const [oldItem] = newItems.splice(index, 1);
+
+    const newData = {
+      ...data,
+      items: newItems
+    };
+
+
+    deleteItem(oldItem).then(removedItem => {
+      if (removedItem === true) {
+        setData(newData);
+      }
+    })
+
+  };
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <Column
@@ -232,6 +252,7 @@ function Category({categoryData, searchValue, isDragDisabled}) {
         isDragDisabled={isDragDisabled}
         onNewItemSubmit={onNewItemSubmit}
         OnItemEditSet={OnItemEditSet}
+        OnItemDeleteConfirm={OnItemDeleteConfirm}
       />
     </DragDropContext>
   );

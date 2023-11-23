@@ -9,7 +9,7 @@ import { EditItemDialog, DeleteItemDialog } from './modals'
 function IconModal({label, index, title, IconType, DialogModal, handleCloseState, handleItemUpdate}) {
   const [dialogOpen, setDialogOpen] = useState(false);
   return (
-    <div>
+    <div style={{flex: 1}}>
       <IconButton aria-label={label} onClick={() => { setDialogOpen(true) }}>
         <IconType fontSize='small'/>
       </IconButton>
@@ -25,15 +25,9 @@ function IconModal({label, index, title, IconType, DialogModal, handleCloseState
   );
 }
 
-function ItemIcons({index, title, handleCloseState, OnItemEditSet}) {
-  const style = {
-    "marginLeft": "auto",
-    "alignItems": "flex-start",
-    "minWidth": 0
-  }
-
+function ItemIcons({index, title, handleCloseState, OnItemEditSet, OnItemDeleteConfirm}) {
   return (
-    <div style={style}>
+    <div style={{display: 'flex', marginLeft: "auto"}}>
       <IconModal
         label="edit"
         index={index}
@@ -50,13 +44,14 @@ function ItemIcons({index, title, handleCloseState, OnItemEditSet}) {
         IconType={DeleteIcon}
         DialogModal={DeleteItemDialog}
         handleCloseState={handleCloseState}
+        handleItemUpdate={OnItemDeleteConfirm}
       />        
     </div>
   );
 }
 
 
-function ItemContainer({index, item, provided, snaphshot, isDragDisabled, OnItemEditSet}) {
+function ItemContainer({index, item, provided, snaphshot, isDragDisabled, OnItemEditSet, OnItemDeleteConfirm}) {
   const [isHovering, setIsHovering] = useState(false);
   const draggableProps = provided.draggableProps;
   const dragHandleProps = provided.dragHandleProps;
@@ -89,20 +84,23 @@ function ItemContainer({index, item, provided, snaphshot, isDragDisabled, OnItem
       onMouseOverCapture={() => {setIsHovering(true)}}
       onMouseOutCapture={() =>  {setIsHovering(false)}}
     >
-      {index+1 + '.' + item.content}
+      <div>
+        {index+1 + '.' + item.content}
+      </div>
       {isHovering && 
         <ItemIcons
           index={index}
           title={item.content}
           handleCloseState={() => {setIsHovering(false)}}
           OnItemEditSet={OnItemEditSet}
+          OnItemDeleteConfirm={OnItemDeleteConfirm}
         />
       }
     </div>
   );
 }
 
-export default function ItemDraggable({item, index, title, isDragDisabled, OnItemEditSet}) {
+export default function ItemDraggable({item, index, title, isDragDisabled, OnItemEditSet, OnItemDeleteConfirm}) {
     return (
       <Draggable draggableId={item.id} index={index} type={title} isDragDisabled={isDragDisabled}>
         {(provided, snaphshot) => (
@@ -113,6 +111,7 @@ export default function ItemDraggable({item, index, title, isDragDisabled, OnIte
             snaphshot={snaphshot}
             isDragDisabled={isDragDisabled}
             OnItemEditSet={OnItemEditSet}
+            OnItemDeleteConfirm={OnItemDeleteConfirm}
           />
         )}
       </Draggable>
