@@ -66,6 +66,8 @@ function ItemContainer({index, item, provided, snaphshot, isDragDisabled, OnItem
     "fontWeight": shouldHighlight ? "bold" : "inherit",
     "boxShadow":  shouldHighlight ? "0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 4px 8px 0 rgba(0, 0, 0, 0.19)" : "inherit", 
     "display": "flex",
+    "flexWrap": "wrap",
+    "position": "relative"
   };
 
   // Have to make sure not to clobber the dnd styles
