@@ -2,11 +2,10 @@ import { isEmpty } from "./utilities";
 
 const PROTOCOL = window.location.protocol;
 const HOST = window.location.hostname;
-const PORT = 8000;
-const URL = `${PROTOCOL}//${HOST}` + (process.env.NODE_ENV === "development" ? `:${PORT}` : "");
+const DEV_PORT = 8000;
+const URL = `${PROTOCOL}//${HOST}` + (process.env.NODE_ENV === "development" ? `:${DEV_PORT}` : "");
 const API_URL = `${URL}/api`
 
-console.log(process.env.NODE_ENV);
 
 export async function getInitialData(loadedData, setLoadedData) {
   
