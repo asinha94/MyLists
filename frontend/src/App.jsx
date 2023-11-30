@@ -87,9 +87,7 @@ function CategoryDropdown({categories, selectedCategory, setSelectedCategory}) {
         onChange={handleChange}
         label="Category"
       >
-        <MenuItem value="">
-          <em>None</em>
-        </MenuItem>
+
         {categories.map(category => {
           return <MenuItem key={category} value={category}>{category}</MenuItem>
         })}
@@ -154,8 +152,14 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [searchValue, setSearchValue] = useState('');
 
-  const categories = Object.keys(loadedData).sort().map(column => column);
   const isDragDisabled = searchValue.length !== 0;
+  const categories = Object.keys(loadedData).sort().map(column => column);
+  
+  // Update the initially selected category
+  if (isMobile && selectedCategory === "" && categories.length > 0) {
+    setSelectedCategory(categories[0]);
+  }
+  
   // GET the full list from the API
   getInitialData(loadedData, setLoadedData);
   return (
