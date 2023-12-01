@@ -18,7 +18,7 @@ CREATE TABLE categories (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     category_title TEXT NOT NULL,
     category_unit TEXT NOT NULL,
-    category_consume_desc TEXT NOT NULL,
+    category_consume_verb TEXT NOT NULL,
     CONSTRAINT categories_pk PRIMARY KEY(id),
     CONSTRAINT categories_userid_fk FOREIGN KEY (user_id) REFERENCES site_users(id),
     CONSTRAINT categories_category_title_uk UNIQUE (user_id, category_title)
