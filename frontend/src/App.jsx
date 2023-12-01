@@ -1,9 +1,10 @@
 // React
 import React, { useState } from 'react';
 //Material UI
-import { styled, alpha } from '@mui/material/styles';
+import { styled, alpha, useTheme } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
+import Drawer from '@mui/material/Drawer';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
@@ -13,6 +14,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import MenuItem from '@mui/material/MenuItem';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import Select from '@mui/material/Select';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -43,6 +46,7 @@ const Search = styled('div')(({ theme }) => ({
   },
 }));
 
+
 const SearchIconWrapper = styled('div')(({ theme }) => ({
   padding: theme.spacing(0, 2),
   height: '100%',
@@ -52,6 +56,7 @@ const SearchIconWrapper = styled('div')(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'center',
 }));
+
 
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
   color: 'inherit',
@@ -70,6 +75,15 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
+
+const DrawerHeader = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  padding: theme.spacing(0, 1),
+  // necessary for content to be below app bar
+  ...theme.mixins.toolbar,
+  justifyContent: 'flex-end',
+}));
 
 function CategoryDropdown({categories, selectedCategory, setSelectedCategory}) {  
   const handleChange = (event) => {
@@ -99,9 +113,20 @@ function CategoryDropdown({categories, selectedCategory, setSelectedCategory}) {
 
 
 function SearchAppBar({categories, selectedCategory, setSelectedCategory, setSearchValue}) {
+  const theme = useTheme();
+  const [open, setOpen] = useState(false);
+
+  const handleDrawerOpen = () => {
+    setOpen(true);
+  }
+
+  const handleDrawerClose = () => {
+    setOpen(false);
+  }
+
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
+      <AppBar position="static" open={open}>
         <Toolbar>
           <IconButton
             size="large"
@@ -109,6 +134,7 @@ function SearchAppBar({categories, selectedCategory, setSelectedCategory, setSea
             color="inherit"
             aria-label="open drawer"
             sx={{ mr: 2 }}
+            onClick={handleDrawerOpen}
           >
             <MenuIcon />
           </IconButton>
@@ -142,6 +168,17 @@ function SearchAppBar({categories, selectedCategory, setSelectedCategory, setSea
           />
         </Toolbar>
       </AppBar>
+      <Drawer
+        variant="persistent"
+        anochor="left"
+        open={open}
+      >
+        <DrawerHeader>
+          <IconButton onClick={handleDrawerClose}>
+            {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+          </IconButton>
+        </DrawerHeader>
+      </Drawer>
     </Box>
   );
 }
