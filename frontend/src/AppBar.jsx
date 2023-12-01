@@ -1,7 +1,7 @@
 // React
 import React, { useState } from 'react';
 //Material UI
-import { styled, alpha, useTheme } from '@mui/material/styles';
+import { styled, alpha } from '@mui/material/styles';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -110,7 +110,6 @@ const Search = styled('div')(({ theme }) => ({
   
   
   export default function SearchAppBar({categories, selectedCategory, setSelectedCategory, setSearchValue}) {
-    //const theme = useTheme();
     const [open, setOpen] = useState(false);
   
     const handleDrawerOpen = () => {

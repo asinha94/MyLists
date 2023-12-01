@@ -1,6 +1,7 @@
 import * as React from 'react';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
+import Box from '@mui/material/Box';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -126,7 +127,7 @@ export function LoginDialog({dialogOpen, setDialogOpen, handleDrawerClose}) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     console.log({
-      email: data.get('email'),
+      email: data.get('username'),
       password: data.get('password'),
     });
     handleClose();
@@ -137,30 +138,30 @@ export function LoginDialog({dialogOpen, setDialogOpen, handleDrawerClose}) {
       <Dialog open={dialogOpen} onClose={handleClose}>
         <DialogTitle>Login</DialogTitle>
         <DialogContent>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="username"
-            label="username"
-            name="username"
-            autoComplete="username"
-            autoFocus
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-          />
+          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="username"
+              label="username"
+              name="username"
+              autoComplete="username"
+              autoFocus
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Password"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+            />
+            <Button type="submit" fullWidth variant="contained">Login</Button>
+          </Box>
         </DialogContent>
-        <DialogActions>
-          <Button color='error' onClick={handleSubmit}>Login</Button>
-        </DialogActions>
       </Dialog>
     </React.Fragment>
   );
