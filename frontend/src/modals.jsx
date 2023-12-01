@@ -115,3 +115,53 @@ export function DeleteItemDialog({index, title, dialogOpen, setDialogOpen, handl
     </React.Fragment>
   );
 }
+
+export function LoginDialog({dialogOpen, setDialogOpen, handleDrawerClose}) {
+  const handleClose = () => {
+    setDialogOpen(false);
+    handleDrawerClose();
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    console.log({
+      email: data.get('email'),
+      password: data.get('password'),
+    });
+    handleClose();
+  };
+
+  return (
+    <React.Fragment>
+      <Dialog open={dialogOpen} onClose={handleClose}>
+        <DialogTitle>Login</DialogTitle>
+        <DialogContent>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="username"
+            label="username"
+            name="username"
+            autoComplete="username"
+            autoFocus
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="Password"
+            type="password"
+            id="password"
+            autoComplete="current-password"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button color='error' onClick={handleSubmit}>Login</Button>
+        </DialogActions>
+      </Dialog>
+    </React.Fragment>
+  );
+}

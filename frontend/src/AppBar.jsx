@@ -24,6 +24,8 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import Select from '@mui/material/Select';
 // Other
 import {isMobile} from 'react-device-detect';
+// The App
+import { LoginDialog } from './modals'
 
 
 const Search = styled('div')(({ theme }) => ({
@@ -108,7 +110,7 @@ const Search = styled('div')(({ theme }) => ({
   
   
   export default function SearchAppBar({categories, selectedCategory, setSelectedCategory, setSearchValue}) {
-    const theme = useTheme();
+    //const theme = useTheme();
     const [open, setOpen] = useState(false);
   
     const handleDrawerOpen = () => {
@@ -174,27 +176,37 @@ const Search = styled('div')(({ theme }) => ({
             </IconButton>
           </DrawerHeader>
           <Divider/>
-          <SideDrawerItem text="Login"/>
+          <SideDrawerItem text="Login" handleDrawerClose={handleDrawerClose}/>
           <Divider/>
-          <SideDrawerItem text="Chris' List" />
-          <SideDrawerItem text="Ewan's List" />
-          <SideDrawerItem text="Naoya's List" />
+          <SideDrawerItem text="Chris' List" handleDrawerClose={handleDrawerClose}/>
+          <SideDrawerItem text="Ewan's List" handleDrawerClose={handleDrawerClose}/>
+          <SideDrawerItem text="Naoya's List" handleDrawerClose={handleDrawerClose}/>
 
         </Drawer>
       </Box>
     );
   }
   
-  function SideDrawerItem({text}) {
+  function SideDrawerItem({text, handleDrawerClose}) {
+    const [open, setOpen] = useState(false);
+
     return (
-      <ListItem key={text} disablePadding>
-        <ListItemButton>
-          <ListItemIcon>
-            <AccountCircleIcon/>
-          </ListItemIcon>
-          <ListItemText primary={text} />
-        </ListItemButton>
-      </ListItem>
+      <div>
+        <ListItem key={text} disablePadding>
+          <ListItemButton onClick={() => setOpen(true)}>
+            <ListItemIcon>
+              <AccountCircleIcon/>
+            </ListItemIcon>
+            <ListItemText primary={text} />
+          </ListItemButton>
+        </ListItem>
+        <LoginDialog
+          dialogOpen={open}
+          setDialogOpen={setOpen}
+          handleDrawerClose={handleDrawerClose}
+        />
+      </div>        
+      
     );
   }
   
