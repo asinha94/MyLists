@@ -118,6 +118,18 @@ async fn get_all_items() -> impl Responder {
 }
 
 
+#[post("/api/user/register")]
+async fn register_new_user(body: web::Json<api::UIRegisterUser>) -> impl Responder {
+
+    let data = body.0;
+    
+    
+    // return Auth/JWT token
+    //serde_json::to_string(&data).unwrap()
+    "".to_string()
+}
+
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()>{
 
