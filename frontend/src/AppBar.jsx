@@ -25,7 +25,7 @@ import Select from '@mui/material/Select';
 // Other
 import {isMobile} from 'react-device-detect';
 // The App
-import { LoginDialog } from './modals'
+import { LoginDialog } from './login'
 
 
 const Search = styled('div')(({ theme }) => ({
@@ -200,11 +200,11 @@ export default function SearchAppBar({categories, selectedCategory, setSelectedC
           </IconButton>
         </DrawerHeader>
         <Divider/>
-        <SideDrawerItem text="Login" handleDrawerClose={handleDrawerClose}/>
+        <SideDrawerItem text="Login / Register" handleDrawerClose={handleDrawerClose}/>
         <Divider/>
-        <SideDrawerItem text="Chris' List" handleDrawerClose={Function.prototype}/>
-        <SideDrawerItem text="Ewan's List" handleDrawerClose={Function.prototype}/>
-        <SideDrawerItem text="Naoya's List" handleDrawerClose={Function.prototype}/>
+        <SideDrawerItem text="Chris' List" handleDrawerClose={handleDrawerClose}/>
+        <SideDrawerItem text="Ewan's List" handleDrawerClose={handleDrawerClose}/>
+        <SideDrawerItem text="Naoya's List" handleDrawerClose={handleDrawerClose}/>
 
       </Drawer>
     </Box>

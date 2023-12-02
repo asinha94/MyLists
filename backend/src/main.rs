@@ -1,8 +1,10 @@
 
 pub mod sql;
 mod api;
+mod app;
 mod utils;
 
+use std::sync::Mutex;
 use std::collections::HashMap;
 use env_logger::Env;
 use actix_web::{get, post, put, delete, web, App, HttpServer, Responder, HttpResponse, middleware::Logger};
@@ -11,6 +13,14 @@ use serde_json;
 
 const HOST: &str = "0.0.0.0";
 const PORT: u16 = 8000;
+
+/*
+To access shared data
+state_data: web::Data<AppState>) -> impl Responder {
+    let shared_data = state_data.app_data.lock().unwrap();
+    let data= &shared_data.data;
+
+*/
 
 #[post("/api/reorder")]
 async fn reorder_item(body: web::Json<api::ChangeDelta>) -> impl Responder {
@@ -114,26 +124,19 @@ async fn main() -> std::io::Result<()>{
     env_logger::init_from_env(Env::default().default_filter_or("debug"));
 
     // Use to share state between all requests
-    // E.g user information, websockets etc..
-    /*
     let shared_data = web::Data::new(
-        AppState {
+        app::AppState {
             app_data: Mutex::new(
-                todo::TODOData {
-                    data: HashMap::new(),
-                    ordering: BTreeMap::new(),
-                    max_id: 0
+                app::User {
+                    username: "asinha".to_string(),
                 }
             )
         }
     );
 
-    HttpServer::new(move || {
+    HttpServer::new(move|| {
         App::new()
         .app_data(shared_data.clone())
-    */
-    HttpServer::new(|| {
-        App::new()
         .service(get_all_items)
         .service(reorder_item)
         .service(insert_item)

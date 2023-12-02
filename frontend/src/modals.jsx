@@ -1,12 +1,12 @@
 import * as React from 'react';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
-import Box from '@mui/material/Box';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+
 
 export function NewItemDialog({category, dialogOpen, setDialogOpen, onNewItemSubmit}) {
   const [newItem, setNewItem] = React.useState("");
@@ -117,52 +117,3 @@ export function DeleteItemDialog({index, title, dialogOpen, setDialogOpen, handl
   );
 }
 
-export function LoginDialog({dialogOpen, setDialogOpen, handleDrawerClose}) {
-  const handleClose = () => {
-    setDialogOpen(false);
-    handleDrawerClose();
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('username'),
-      password: data.get('password'),
-    });
-    handleClose();
-  };
-
-  return (
-    <React.Fragment>
-      <Dialog open={dialogOpen} onClose={handleClose}>
-        <DialogTitle>Login</DialogTitle>
-        <DialogContent>
-          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="username"
-              label="username"
-              name="username"
-              autoComplete="username"
-              autoFocus
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-            />
-            <Button type="submit" fullWidth variant="contained">Login</Button>
-          </Box>
-        </DialogContent>
-      </Dialog>
-    </React.Fragment>
-  );
-}
