@@ -160,15 +160,12 @@ export async function registerUser(username, password, malformedPasswordMsg) {
     const registerUpdateData = {
       authorized: false,
       authFailReason: null,
-      authToken: null,
       authReason: null,
     }
 
     if (response.ok) {
-      const responseData = await response.json();
       registerUpdateData.authorized = true;
       registerUpdateData.authReason = 'New User Registered';
-      registerUpdateData.authToken = responseData.password;
     }
     
     // 400 bad password, shouldnt happen

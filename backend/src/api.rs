@@ -28,6 +28,7 @@ pub struct Column {
     pub items: Vec<UIItem>
 }
 
+
 #[allow(non_snake_case)]
 #[derive(Serialize, Deserialize)]
 pub struct ChangeDelta {
@@ -36,6 +37,7 @@ pub struct ChangeDelta {
     pub itemBefore: UIItem,
     pub itemAfter: UIItem,
 }
+
 
 #[derive(Serialize, Deserialize)]
 pub struct UIRegisterUser {

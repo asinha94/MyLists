@@ -8,6 +8,7 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 // App
 import { registerUser } from './services'
+import { setCookie } from './utilities'
 
 const MIN_PASSWORD_LENGTH = 8;
 const PASSWORD_NO_MATCH_MSG = "Passwords must match";
@@ -103,8 +104,6 @@ function SignUp({tabIndex, index, handleClose}) {
       }
 
       if (registerResponse.authorized) {
-        // Save Auth token somewhere
-        console.log(registerResponse);
         handleClose();
         return;
       }

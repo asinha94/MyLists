@@ -6,21 +6,20 @@ pub mod utils;
 
 use std::sync::Mutex;
 use std::collections::HashMap;
+use actix_session::{config::{PersistentSession, CookieContentSecurity}, Session};
 use env_logger::Env;
 use actix_web::{get, post, put, delete, web, App, HttpServer, Responder, HttpResponse, middleware::Logger};
 use actix_cors::Cors;
+use actix_session::SessionMiddleware;
+use actix_session::storage::CookieSessionStore;
+use actix_web::cookie::Key;
+use base64::{Engine as _, engine::general_purpose};
 use serde_json;
+//use cookie;
 
 const HOST: &str = "0.0.0.0";
 const PORT: u16 = 8000;
 
-/*
-To access shared data
-state_data: web::Data<AppState>) -> impl Responder {
-    let shared_data = state_data.app_data.lock().unwrap();
-    let data= &shared_data.data;
-
-*/
 
 #[post("/api/reorder")]
 async fn reorder_item(body: web::Json<api::ChangeDelta>) -> impl Responder {
@@ -103,15 +102,14 @@ async fn get_all_items() -> impl Responder {
 
 
 #[post("/api/register")]
-async fn register_new_user(body: web::Json<api::UIRegisterUser>) -> impl Responder {
+async fn register_new_user(body: web::Json<api::UIRegisterUser>, state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
 
-    let mut data = body.0;
+    let data = body.0;
     let username = data.username;
     let password = data.password;
-    let empty_string = "".to_string();
 
     if !utils::login::password_is_valid(&password) {
-        return HttpResponse::BadRequest().body(empty_string);
+        return HttpResponse::BadRequest();
     }
 
     let password_hash = utils::login::create_hashed_password(&password);
@@ -121,16 +119,38 @@ async fn register_new_user(body: web::Json<api::UIRegisterUser>) -> impl Respond
     match e {
         Err(e) => {
             println!("{:?}", e);
-            HttpResponse::Conflict().body(empty_string)
+            HttpResponse::Conflict()
         },
         _ => {
-            data.username = username;
-            data.password = "AuthToken".to_string();
-            HttpResponse::Ok().body(serde_json::to_string(&data).unwrap())
+            let cookie_api_key = Key::generate();
+            let cookie_api_key_bytes = cookie_api_key.master();
+            let api_key = general_purpose::STANDARD.encode(cookie_api_key_bytes);
+            let mut shared_data = state_data.app_data.lock().unwrap();
+            // This invalidates the previous key. Might want to keep a list
+            shared_data.insert(api_key.clone(), username.clone());
+            match session.insert("authToken", api_key) {
+                Ok(_) =>  HttpResponse::Ok(),
+                Err(e) => {
+                    println!("Failed to set cookie: {e}");
+                    HttpResponse::InternalServerError()
+                }
+            }
+           
         }
     }
 }
 
+
+fn session_middleware() -> SessionMiddleware<CookieSessionStore> {
+    SessionMiddleware::builder(
+        CookieSessionStore::default(), Key::generate())
+        .session_lifecycle(PersistentSession::default())
+        .cookie_content_security(CookieContentSecurity::Private)
+         // Remove for prod
+        .cookie_same_site(cookie::SameSite::None)
+        .cookie_secure(false)
+        .build()
+}
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()>{
@@ -140,11 +160,7 @@ async fn main() -> std::io::Result<()>{
     // Use to share state between all requests
     let shared_data = web::Data::new(
         app::AppState {
-            app_data: Mutex::new(
-                app::User {
-                    username: "asinha".to_string(),
-                }
-            )
+            app_data: Mutex::new(HashMap::new())
         }
     );
 
@@ -159,6 +175,7 @@ async fn main() -> std::io::Result<()>{
         .service(register_new_user)
         .wrap(Cors::permissive())
         .wrap(Logger::default())
+        .wrap(session_middleware())
     })
     .bind((HOST, PORT))?
     .run()
