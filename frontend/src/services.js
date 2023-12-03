@@ -141,3 +141,58 @@ export async function deleteItem(item) {
     return null;
   }
 }
+
+
+export async function registerUser(username, password, malformedPasswordMsg) {
+  const credentials = {username: username, password: password}
+  try {
+    const response = await fetch(API_URL + '/register', {
+      method: 'POST',
+      headers: {
+        'Accept': 'appplication/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(credentials)
+      }
+    );
+
+    
+    const registerUpdateData = {
+      authorized: false,
+      authFailReason: null,
+      authToken: null,
+      authReason: null,
+    }
+
+    if (response.ok) {
+      const responseData = await response.json();
+      registerUpdateData.authorized = true;
+      registerUpdateData.authReason = 'New User Registered';
+      registerUpdateData.authToken = responseData.password;
+    }
+    
+    // 400 bad password, shouldnt happen
+    else if (response.status === 400) {
+      registerUpdateData.authFailReason = 'password';
+      registerUpdateData.authReason = malformedPasswordMsg;
+    }
+
+    // 409 username in use
+    else if (response.status === 409) {
+      registerUpdateData.authFailReason = 'username';
+      registerUpdateData.authReason = 'Username already taken'
+    }
+
+    else {
+      // Unexpected Error
+      console.log("Recieved error while trying to register user: " + response.status + " " + response.statusText);
+      registerUpdateData.authReason = response.statusText;
+    }
+
+    return registerUpdateData;
+
+  } catch(err) {
+    console.log(err.message);
+    return null;
+  }
+}

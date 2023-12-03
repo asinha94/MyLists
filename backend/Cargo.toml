@@ -13,8 +13,10 @@ serde =  { version = "1.0.190", features = ["derive"] }
 serde_json = "1.0.108"
 sqlx = { version = "0.7", features = [ "runtime-tokio", "tls-native-tls", "postgres" ] }
 tokio = { version = "1", features = ["full"] }
+rpassword = "7.3"
 env_logger = "0.10.1"
 argon2 = "0.5.2"
+regex = "1.10.2"
 
 
 [[bin]]
@@ -24,7 +26,7 @@ path = "src/utils/insert.rs"
 
 [[bin]]
 name = "create_user"
-path = "src/utils/create_user.rs"
+path = "src/utils/login.rs"
 
 
 [profile.dev]

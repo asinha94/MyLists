@@ -37,7 +37,7 @@ pub struct ChangeDelta {
     pub itemAfter: UIItem,
 }
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct UIRegisterUser {
     pub username: String,
     pub password: String,

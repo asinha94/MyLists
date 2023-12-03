@@ -2,7 +2,7 @@
 pub mod sql;
 mod api;
 mod app;
-mod utils;
+pub mod utils;
 
 use std::sync::Mutex;
 use std::collections::HashMap;
@@ -34,15 +34,8 @@ async fn reorder_item(body: web::Json<api::ChangeDelta>) -> impl Responder {
     let id = updated_item.id.parse().unwrap();
     sql::update_item_order(id, &new_key).await;
 
-    println!("{} item (id {}) {} OrderKey {} -> {}",
-        change_delta.category,
-        updated_item.id,
-        updated_item.content,
-        updated_item.order_key,
-        new_key);
-
     updated_item.order_key = new_key;
-    HttpResponse::Ok().body(serde_json::to_string(&updated_item).unwrap())
+    serde_json::to_string(&updated_item).unwrap()
 }
 
 
@@ -66,8 +59,7 @@ async fn insert_item(body: web::Json<api::ChangeDelta>) -> impl Responder {
         order_key: new_key
     };
 
-    println!("New {category} item \'{title}\' (id {new_id}, OrderKey {}) added", new_item.order_key);
-    HttpResponse::Ok().body(serde_json::to_string(&new_item).unwrap())
+    serde_json::to_string(&new_item).unwrap()
 }
 
 
@@ -75,12 +67,8 @@ async fn insert_item(body: web::Json<api::ChangeDelta>) -> impl Responder {
 async fn update_item_title(body: web::Json<api::UIItem>) -> impl Responder {
     let item = body.0;
     let item_id = item.id.parse().unwrap();
-
-    // Make SQL query
     sql::update_item_title(item_id, &item.content).await;
-
-    println!("Item ({}) title updated to {}", item.id, item.content);
-    HttpResponse::Ok().body(serde_json::to_string(&item).unwrap())
+    serde_json::to_string(&item).unwrap()
 }
 
 
@@ -88,12 +76,8 @@ async fn update_item_title(body: web::Json<api::UIItem>) -> impl Responder {
 async fn delete_item(body: web::Json<api::UIItem>) -> impl Responder {
     let item = body.0;
     let item_id = item.id.parse().unwrap();
-
-    // Make SQL query
     sql::delete_item(item_id).await;
-
-    println!("Item ({}) title updated to {}", item.id, item.content);
-    HttpResponse::Ok().body(serde_json::to_string(&item).unwrap())
+    serde_json::to_string(&item).unwrap()
 }
 
 #[get("/api/items")]
@@ -118,15 +102,33 @@ async fn get_all_items() -> impl Responder {
 }
 
 
-#[post("/api/user/register")]
+#[post("/api/register")]
 async fn register_new_user(body: web::Json<api::UIRegisterUser>) -> impl Responder {
 
-    let data = body.0;
+    let mut data = body.0;
+    let username = data.username;
+    let password = data.password;
+    let empty_string = "".to_string();
+
+    if !utils::login::password_is_valid(&password) {
+        return HttpResponse::BadRequest().body(empty_string);
+    }
+
+    let password_hash = utils::login::create_hashed_password(&password);
+    let e = sql::insert_user(&username, &password_hash).await;
     
-    
-    // return Auth/JWT token
-    //serde_json::to_string(&data).unwrap()
-    "".to_string()
+    // Check for conflict
+    match e {
+        Err(e) => {
+            println!("{:?}", e);
+            HttpResponse::Conflict().body(empty_string)
+        },
+        _ => {
+            data.username = username;
+            data.password = "AuthToken".to_string();
+            HttpResponse::Ok().body(serde_json::to_string(&data).unwrap())
+        }
+    }
 }
 
 
@@ -154,6 +156,7 @@ async fn main() -> std::io::Result<()>{
         .service(insert_item)
         .service(update_item_title)
         .service(delete_item)
+        .service(register_new_user)
         .wrap(Cors::permissive())
         .wrap(Logger::default())
     })

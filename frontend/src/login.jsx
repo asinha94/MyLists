@@ -6,11 +6,13 @@ import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
+// App
+import { registerUser } from './services'
 
 const MIN_PASSWORD_LENGTH = 8;
 const PASSWORD_NO_MATCH_MSG = "Passwords must match";
-const PASSWORD_VALIDATION_MSG = "Password must be a mix of uppercase, lowercase,\
-  numbers and special characters (!@#$%^&*()?/<>,./\|)";
+/* eslint-disable no-useless-escape */
+const PASSWORD_VALIDATION_MSG = "Password must be a mix of uppercase, lowercase, numbers and special characters (!@#$%^&*()?/<>,./\|)"; 
 
 
 function passwordSuccessfullInputValidation(password) {
@@ -24,12 +26,9 @@ function passwordSuccessfullInputValidation(password) {
 function SignIn({tabIndex, index, handleClose}) {
   const handleSubmitLogin = (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    
-    const username = data.get('username');
-    const pw1 = data.get('password');
-
-
+    //const data = new FormData(event.currentTarget); 
+    //const username = data.get('username');
+    //const pw1 = data.get('password');
     handleClose();
   };
 
@@ -64,6 +63,8 @@ function SignIn({tabIndex, index, handleClose}) {
 }
 
 function SignUp({tabIndex, index, handleClose}) {
+  const [failedUsername, setFailedUsername] = React.useState('');
+  const [usernameHelperText, setUsernameHelperText] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [confirmPassword, setConfirmPassword] = React.useState('');
   const [passwordHelperText, setPasswordErrorText] = React.useState('');
@@ -78,6 +79,11 @@ function SignUp({tabIndex, index, handleClose}) {
     const pw1 = data.get('password');
     const pw2 = data.get('confirm-password');
 
+    // Prevent resubmit if the dup username is being tried again
+    if (username === failedUsername) {
+      return false;
+    }
+
     // Validate passwords
     if (!passwordSuccessfullInputValidation(pw1)) {
       setConfirmPasswordHelperText(PASSWORD_VALIDATION_MSG);
@@ -91,9 +97,36 @@ function SignUp({tabIndex, index, handleClose}) {
     }
 
     //TODO(anu): Make backend call here!
-    handleClose();
-    
+    registerUser(username, pw1, PASSWORD_VALIDATION_MSG).then(registerResponse => {
+      if (registerResponse === null) {
+        return;
+      }
+
+      if (registerResponse.authorized) {
+        // Save Auth token somewhere
+        console.log(registerResponse);
+        handleClose();
+        return;
+      }
+
+      if (registerResponse.authFailReason === 'username') {
+        setFailedUsername(username);
+        setUsernameHelperText(registerResponse.authReason);
+      }
+
+      else if (registerResponse.authFailReason === 'password') {
+        setPasswordErrorText(registerResponse.authReason);
+      }
+
+      else {
+        console.log("Unknown failure reason: " + registerResponse.authFailReason);
+      }
+    })
   };
+
+  const handleUsernameChange = (event) => {
+    setUsernameHelperText("");
+  }
 
   const handlePasswordChange = (event) => {
     const passwordValue = event.target.value;
@@ -126,6 +159,9 @@ function SignUp({tabIndex, index, handleClose}) {
           label="Username"
           name="username"
           autoComplete="username"
+          onChange={handleUsernameChange}
+          helperText={usernameHelperText}
+          error={usernameHelperText!==""}
           autoFocus
         />
         <TextField

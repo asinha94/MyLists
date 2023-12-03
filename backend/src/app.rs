@@ -1,5 +1,5 @@
 use std::sync::Mutex;
-use std::collections::HashMap;
+//use std::collections::HashMap;
 
 pub struct User {
     pub username: String,
