@@ -107,6 +107,15 @@ async fn get_all_items() -> impl Responder {
 #[post("/api/register")]
 async fn register_new_user(body: web::Json<api::UIRegisterUser>, state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
 
+    match session.get::<String>("authToken").unwrap() {
+        None => (),
+        Some(_) => {
+            // I dont have a good reponse code for "Already Logged in"
+            return HttpResponse::NotAcceptable();
+        }
+    }
+
+
     let data = body.0;
     let username = data.username;
     let password = data.password;
@@ -130,7 +139,8 @@ async fn register_new_user(body: web::Json<api::UIRegisterUser>, state_data: web
             let api_key = general_purpose::STANDARD.encode(cookie_api_key_bytes);
             let mut shared_data = state_data.app_data.lock().unwrap();
             // This invalidates the previous key. Might want to keep a list
-            shared_data.insert(api_key.clone(), username.clone());
+            //shared_data.insert(api_key.clone(), username.clone());
+
             match session.insert("authToken", api_key) {
                 Ok(_) =>  HttpResponse::Ok(),
                 Err(e) => {
@@ -145,19 +155,25 @@ async fn register_new_user(body: web::Json<api::UIRegisterUser>, state_data: web
 
 
 fn session_middleware() -> SessionMiddleware<CookieSessionStore> {
+    /* Key::generate() */
+    let cookie_secret_key = "gjFIiSwMlxg+hPgn16du3JKI09Dk6ChZX8bvy8hhoy3NpU/yLSSrVXI/7BnfMC+oz9wx7wyxe0kn7+X6PaZdZA==";
+    let cookie_secret_key_decoded = general_purpose::STANDARD.decode(cookie_secret_key)
+        .unwrap();
+    let key = Key::from(&cookie_secret_key_decoded);
+
     SessionMiddleware::builder(
-        CookieSessionStore::default(), Key::generate())
+        CookieSessionStore::default(), key)
         .session_lifecycle(PersistentSession::default())
-        .cookie_content_security(CookieContentSecurity::Private)
-         // Remove for prod
-        .cookie_same_site(cookie::SameSite::None)
+        //.cookie_content_security(CookieContentSecurity::Private)
+        // Remove for prod
+        .cookie_content_security(CookieContentSecurity::Signed)
+        .cookie_http_only(false)
         .cookie_secure(false)
         .build()
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()>{
-
     env_logger::init_from_env(Env::default().default_filter_or("debug"));
 
     // Use to share state between all requests

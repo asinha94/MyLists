@@ -148,6 +148,7 @@ export async function registerUser(username, password, malformedPasswordMsg) {
   try {
     const response = await fetch(API_URL + '/register', {
       method: 'POST',
+      'credentials': 'include',
       headers: {
         'Accept': 'appplication/json',
         'Content-Type': 'application/json'
@@ -172,6 +173,12 @@ export async function registerUser(username, password, malformedPasswordMsg) {
     else if (response.status === 400) {
       registerUpdateData.authFailReason = 'password';
       registerUpdateData.authReason = malformedPasswordMsg;
+    }
+
+    // 406, already authenticated
+    else if (response.status === 406) {
+      registerUpdateData.authFailReason = 'username';
+      registerUpdateData.authReason = 'Already logged in';
     }
 
     // 409 username in use
