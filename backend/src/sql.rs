@@ -103,3 +103,19 @@ pub async fn delete_item(id: i32) {
         .await
         .unwrap();
 }
+
+
+pub async fn insert_user(username: &String, password_hash: &String)
+    -> Result<sqlx::postgres::PgQueryResult, sqlx::Error>
+{
+    let connuri = get_postgres_connect_uri();
+    let mut conn = PgConnection::connect(&connuri).await.unwrap();
+
+    sqlx::query("
+        INSERT INTO site_users (username, password_hash)
+        VALUES ($1, $2)")
+        .bind(username)
+        .bind(password_hash)
+        .execute(&mut conn)
+        .await
+}

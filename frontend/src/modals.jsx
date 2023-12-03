@@ -7,6 +7,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
+
 export function NewItemDialog({category, dialogOpen, setDialogOpen, onNewItemSubmit}) {
   const [newItem, setNewItem] = React.useState("");
   
@@ -115,3 +116,4 @@ export function DeleteItemDialog({index, title, dialogOpen, setDialogOpen, handl
     </React.Fragment>
   );
 }
+
