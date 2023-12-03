@@ -20,7 +20,7 @@ const itemListStyle = {
   "minHeight": "100px"
 }
 
-function TitleBar({title, onNewItemSubmit}) {
+function TitleBar({title, unit, verb, onNewItemSubmit}) {
   const [dialogOpen, setDialogOpen] = React.useState(false);
 
   const titleSyle = {
@@ -48,6 +48,8 @@ function TitleBar({title, onNewItemSubmit}) {
       </IconButton>
       <NewItemDialog
         category={title}
+        unit={unit}
+        verb={verb}
         dialogOpen={dialogOpen}
         setDialogOpen={setDialogOpen}
         onNewItemSubmit={onNewItemSubmit}
@@ -57,8 +59,11 @@ function TitleBar({title, onNewItemSubmit}) {
 }
 
 
-function Column({column, items, searchValue, isDragDisabled, onNewItemSubmit, OnItemEditSet, OnItemDeleteConfirm}) {
+function Column({column, searchValue, isDragDisabled, onNewItemSubmit, OnItemEditSet, OnItemDeleteConfirm}) {
   const title = column.title;
+  const items = column.items;
+  const unit = column.unit;
+  const verb = column.verb;
 
   const searchValueLowerCase = searchValue.toLowerCase();
   const indexedItems = items.map((item, index) => { return {'item': item, 'index': index} } );
@@ -68,7 +73,12 @@ function Column({column, items, searchValue, isDragDisabled, onNewItemSubmit, On
   
   return (
     <div style={columnStyle}>
-      <TitleBar title={title} onNewItemSubmit={onNewItemSubmit}/>
+      <TitleBar
+        title={title}
+        unit={unit}
+        verb={verb}
+        onNewItemSubmit={onNewItemSubmit}
+      />
       <Droppable droppableId={column.id} type={title}>
         {(provided, snaphshot) => {
           const style = {
@@ -247,7 +257,7 @@ function Category({categoryData, searchValue, isDragDisabled}) {
       <Column
         key={data.id}
         column={data}
-        items={data.items}
+        //items={data.items}
         searchValue={searchValue}
         isDragDisabled={isDragDisabled}
         onNewItemSubmit={onNewItemSubmit}

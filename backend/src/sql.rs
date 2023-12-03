@@ -17,20 +17,26 @@ pub fn get_postgres_connect_uri() -> String {
 pub struct DBItem {
     pub id: i32,
     pub category_title: String,
+    pub category_unit: String,
+    pub category_consume_verb: String,
     pub title: String,
     pub order_key: String
 }
 
 
-pub async fn get_all_items() -> Vec<DBItem> {
+pub async fn get_all_items(user: &String) -> Vec<DBItem> {
     let connuri = get_postgres_connect_uri();
     let mut conn = PgConnection::connect(&connuri).await.unwrap();
 
     sqlx::query_as::<_, DBItem>("
-        SELECT i.id, c.category_title, i.title, i.order_key
+        SELECT i.id, c.category_title, c.category_unit, c.category_consume_verb, i.title, i.order_key
         FROM items i
         JOIN categories c ON c.id = i.category_id
-        ORDER BY i.order_key")
+        JOIN site_users u ON u.id = c.user_id
+        WHERE u.username = $1
+        ORDER BY i.order_key
+        ")
+        .bind(user)
         .fetch_all(&mut conn)
         .await
         .unwrap()

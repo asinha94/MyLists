@@ -82,7 +82,8 @@ async fn delete_item(body: web::Json<api::UIItem>) -> impl Responder {
 #[get("/api/items")]
 async fn get_all_items() -> impl Responder {
 
-    let items = sql::get_all_items().await;
+    let username = "asinha".to_string();
+    let items = sql::get_all_items(&username).await;
     // Create dict lists from list of dicts
     let mut data = HashMap::new();
     for item in items {
@@ -91,6 +92,8 @@ async fn get_all_items() -> impl Responder {
             .or_insert(api::Column {
                 id: item.category_title.clone(),
                 title: item.category_title.clone(),
+                unit: item.category_unit.clone(),
+                verb: item.category_consume_verb.clone(),
                 items: Vec::new(),
             });
 

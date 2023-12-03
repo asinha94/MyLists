@@ -25,6 +25,8 @@ impl UIItem {
 pub struct Column {
     pub id: String,
     pub title: String,
+    pub unit: String,
+    pub verb: String,
     pub items: Vec<UIItem>
 }
 

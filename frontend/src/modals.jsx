@@ -8,7 +8,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
 
-export function NewItemDialog({category, dialogOpen, setDialogOpen, onNewItemSubmit}) {
+export function NewItemDialog({category, unit, verb, dialogOpen, setDialogOpen, onNewItemSubmit}) {
   const [newItem, setNewItem] = React.useState("");
   
   const handleClose = () => {setDialogOpen(false);};
@@ -22,7 +22,7 @@ export function NewItemDialog({category, dialogOpen, setDialogOpen, onNewItemSub
         <DialogTitle>Add new {category} item</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Enter the title of the 'categoty_unit' to 'consume'
+            Enter the title of the {unit} to {verb}
           </DialogContentText>
           <TextField
             autoFocus
