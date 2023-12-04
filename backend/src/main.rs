@@ -93,10 +93,8 @@ async fn get_all_users() -> impl Responder {
 
 
 #[get("/api/items")]
-async fn get_all_items() -> impl Responder {
-
-    let username = "asinha".to_string();
-    let items = sql::get_all_items(&username).await;
+async fn get_all_items(user: web::Query<api::UIGetItemUser>) -> impl Responder {
+    let items = sql::get_all_user_items(&user.userGuid).await;
     // Create dict lists from list of dicts
     let mut data = HashMap::new();
     for item in items {

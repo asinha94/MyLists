@@ -59,7 +59,7 @@ pub async fn get_all_users_credentials() -> Vec<DBCredentialUser> {
 }
 
 
-pub async fn get_all_items(user: &String) -> Vec<DBItem> {
+pub async fn get_all_user_items(user_guid: &String) -> Vec<DBItem> {
     let connuri = get_postgres_connect_uri();
     let mut conn = PgConnection::connect(&connuri).await.unwrap();
 
@@ -68,9 +68,9 @@ pub async fn get_all_items(user: &String) -> Vec<DBItem> {
         FROM items i
         JOIN categories c ON c.id = i.category_id
         JOIN site_users u ON u.id = c.user_id
-        WHERE u.username = $1
+        WHERE u.user_guid = $1
         ORDER BY i.order_key")
-        .bind(user)
+        .bind(user_guid)
         .fetch_all(&mut conn)
         .await
         .unwrap()

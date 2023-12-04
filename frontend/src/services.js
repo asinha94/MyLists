@@ -1,5 +1,3 @@
-import { isEmpty } from "./utilities";
-
 const PROTOCOL = window.location.protocol;
 const HOST = window.location.hostname;
 const DEV_PORT = 8000;
@@ -26,28 +24,23 @@ export async function getAllUsers() {
   }
 };
 
-
-export async function getInitialData(loadedData, setLoadedData) {
-  
-
-  if (!isEmpty(loadedData)) {
-    return;
-  } 
-  
+// TODO: Toast message on failure
+export async function getUserItemData(userGuid) {  
   try {
-    const response = await fetch(API_URL + '/items');
+    const response = await fetch(
+      API_URL + '/items?' + new URLSearchParams({userGuid: userGuid})
+    );
 
     if (!response.ok) {
       console.log("Got error: " + response.statusText);
-      return;
+      return null;
     }
 
-    const responseData = await response.json();
-    setLoadedData(responseData);
+    return await response.json();
 
   } catch(err) {
     console.log(err.message);
-    return;
+    return null;
   }
 };
 

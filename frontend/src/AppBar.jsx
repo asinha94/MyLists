@@ -110,7 +110,7 @@ function CategoryDropdown({categories, selectedCategory, setSelectedCategory}) {
 }
 
 
-function SideDrawerItem({text, handleDrawerClose}) {
+function LoginSideDrawerItem({text, handleDrawerClose}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -133,9 +133,36 @@ function SideDrawerItem({text, handleDrawerClose}) {
   );
 }
 
+
+function UserSideDrawerItem({user, setSelectedUser, handleDrawerClose}) {
+  const userGuid = user.user_guid;
+  const userDisplayName = user.display_name;
+
+  const appostrophe_s = userDisplayName[userDisplayName.length-1] === 's' ? '' : 's';
+  const displayText = `${userDisplayName}'${appostrophe_s} List`
+  const handleOnClick = () => {
+    setSelectedUser(user);
+    handleDrawerClose();
+  };
+  return (
+    <ListItem key={userGuid} disablePadding>
+      <ListItemButton onClick={handleOnClick}>
+        <ListItemIcon>
+          <AccountCircleIcon/>
+        </ListItemIcon>
+        <ListItemText primary={displayText} />
+      </ListItemButton>
+    </ListItem>
+  );
+}
+
   
-export default function SearchAppBar({users, categories, selectedCategory, setSelectedCategory, setSearchValue}) {
+export default function SearchAppBar({users, categories, selectedCategory, setSelectedCategory, setSearchValue, selectedUser, setSelectedUser}) {
   const [open, setOpen] = useState(false);
+
+  const displayName = selectedUser.display_name;
+  const appostrophe_s = displayName[displayName.length-1] === 's' ? '' : 's';
+  const listTitle = `${displayName}'${appostrophe_s} List`
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -144,6 +171,8 @@ export default function SearchAppBar({users, categories, selectedCategory, setSe
   const handleDrawerClose = () => {
     setOpen(false);
   }
+
+  
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -165,7 +194,7 @@ export default function SearchAppBar({users, categories, selectedCategory, setSe
             component="div"
             sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
           >
-            My Lists
+            {listTitle}
           </Typography>
 
           <Search>
@@ -200,11 +229,16 @@ export default function SearchAppBar({users, categories, selectedCategory, setSe
           </IconButton>
         </DrawerHeader>
         <Divider/>
-        <SideDrawerItem text="Login / Register" handleDrawerClose={handleDrawerClose}/>
+        <LoginSideDrawerItem
+          text="Login / Register"
+          handleDrawerClose={handleDrawerClose}
+        />
         <Divider/>
-        {users.map( user => 
-          <SideDrawerItem
-            text={user.display_name}
+        {users.map(user => 
+          <UserSideDrawerItem
+            key={user.user_guid}
+            user={user}
+            setSelectedUser={setSelectedUser}
             handleDrawerClose={handleDrawerClose}
           />
         )}

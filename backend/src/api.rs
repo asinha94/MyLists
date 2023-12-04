@@ -61,6 +61,11 @@ pub struct UIDisplayUser {
     pub display_name: String
 }
 
+#[derive(Deserialize)]
+pub struct UIGetItemUser {
+    pub userGuid: String,
+}
+
 pub struct UserCredentials {
     pub username: String,
     pub password_hash: String,
