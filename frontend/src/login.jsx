@@ -8,6 +8,7 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 // App
 import { registerUser } from './services'
+import { setCookie } from './utilities'
 
 const MIN_PASSWORD_LENGTH = 8;
 const PASSWORD_NO_MATCH_MSG = "Passwords must match";
@@ -71,7 +72,7 @@ function SignUp({tabIndex, index, handleClose}) {
   const [confirmPasswordHelperText, setConfirmPasswordHelperText] = React.useState('');
 
 
-  const handleSubmitRegister = (event) => {
+  const handleRegisterSubmit= (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
 
@@ -96,17 +97,20 @@ function SignUp({tabIndex, index, handleClose}) {
       return false;
     }
 
-    //TODO(anu): Make backend call here!
     registerUser(username, pw1, PASSWORD_VALIDATION_MSG).then(registerResponse => {
       if (registerResponse === null) {
         return;
       }
 
       if (registerResponse.authorized) {
-        // Save Auth token somewhere
-        console.log(registerResponse);
+        // TODO: tell user to sign in again
         handleClose();
         return;
+      }
+
+      if (registerResponse.authFailReason === "loggedin") {
+        // TODO: Trigger usual sign in flow
+        // This most likely cant happen
       }
 
       if (registerResponse.authFailReason === 'username') {
@@ -150,7 +154,7 @@ function SignUp({tabIndex, index, handleClose}) {
 
   return (
     <div hidden={tabIndex !== index}>
-      <Box component="form" onSubmit={handleSubmitRegister} sx={{ mt: 1 }}>
+      <Box component="form" onSubmit={handleRegisterSubmit} sx={{ mt: 1 }}>
         <TextField
           margin="normal"
           required

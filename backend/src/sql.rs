@@ -17,20 +17,42 @@ pub fn get_postgres_connect_uri() -> String {
 pub struct DBItem {
     pub id: i32,
     pub category_title: String,
+    pub category_unit: String,
+    pub category_consume_verb: String,
     pub title: String,
     pub order_key: String
 }
+#[derive(sqlx::FromRow)]
+pub struct DBUser {
+    pub username: String,
+    pub password_hash: String
+}
 
 
-pub async fn get_all_items() -> Vec<DBItem> {
+pub async fn get_all_users() -> Vec<DBUser> {
+    let connuri = get_postgres_connect_uri();
+    let mut conn = PgConnection::connect(&connuri).await.unwrap();
+
+    sqlx::query_as::<_, DBUser>("
+        SELECT username, password_hash FROM site_users")
+        .fetch_all(&mut conn)
+        .await
+        .unwrap()
+}
+
+
+pub async fn get_all_items(user: &String) -> Vec<DBItem> {
     let connuri = get_postgres_connect_uri();
     let mut conn = PgConnection::connect(&connuri).await.unwrap();
 
     sqlx::query_as::<_, DBItem>("
-        SELECT i.id, c.category_title, i.title, i.order_key
+        SELECT i.id, c.category_title, c.category_unit, c.category_consume_verb, i.title, i.order_key
         FROM items i
         JOIN categories c ON c.id = i.category_id
+        JOIN site_users u ON u.id = c.user_id
+        WHERE u.username = $1
         ORDER BY i.order_key")
+        .bind(user)
         .fetch_all(&mut conn)
         .await
         .unwrap()
