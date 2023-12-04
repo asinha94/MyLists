@@ -134,7 +134,7 @@ function SideDrawerItem({text, handleDrawerClose}) {
 }
 
   
-export default function SearchAppBar({categories, selectedCategory, setSelectedCategory, setSearchValue}) {
+export default function SearchAppBar({users, categories, selectedCategory, setSelectedCategory, setSearchValue}) {
   const [open, setOpen] = useState(false);
 
   const handleDrawerOpen = () => {
@@ -202,10 +202,12 @@ export default function SearchAppBar({categories, selectedCategory, setSelectedC
         <Divider/>
         <SideDrawerItem text="Login / Register" handleDrawerClose={handleDrawerClose}/>
         <Divider/>
-        <SideDrawerItem text="Chris' List" handleDrawerClose={handleDrawerClose}/>
-        <SideDrawerItem text="Ewan's List" handleDrawerClose={handleDrawerClose}/>
-        <SideDrawerItem text="Naoya's List" handleDrawerClose={handleDrawerClose}/>
-
+        {users.map( user => 
+          <SideDrawerItem
+            text={user.display_name}
+            handleDrawerClose={handleDrawerClose}
+          />
+        )}
       </Drawer>
     </Box>
   );

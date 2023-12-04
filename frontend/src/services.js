@@ -6,6 +6,26 @@ const DEV_PORT = 8000;
 const URL = `${PROTOCOL}//${HOST}` + (process.env.NODE_ENV === "development" ? `:${DEV_PORT}` : "");
 const API_URL = `${URL}/api`
 
+// TODO: Add toast message for network errors
+
+export async function getAllUsers() {
+  
+  try {
+    const response = await fetch(API_URL + '/users');
+
+    if (!response.ok) {
+      console.log("Got error: " + response.statusText);
+      return null;
+    }
+
+    return await response.json();    
+
+  } catch(err) {
+    console.log(err.message);
+    return null;
+  }
+};
+
 
 export async function getInitialData(loadedData, setLoadedData) {
   
@@ -142,7 +162,7 @@ export async function deleteItem(item) {
   }
 }
 
-
+// TODO: Get guid back so I can insert it into the List immediately
 export async function registerUser(displayname, username, password, malformedPasswordMsg) {
   const credentials = {displayname: displayname, username: username, password: password}
   try {

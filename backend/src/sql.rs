@@ -31,7 +31,7 @@ pub struct DBCredentialUser {
 #[derive(sqlx::FromRow)]
 pub struct DBUIUser {
     pub user_guid: String,
-    pub display: String
+    pub display_name: String
 }
 
 
@@ -40,7 +40,7 @@ pub async fn get_all_users() -> Vec<DBUIUser> {
     let mut conn = PgConnection::connect(&connuri).await.unwrap();
 
     sqlx::query_as::<_, DBUIUser>("
-        SELECT user_guid, display FROM site_users")
+        SELECT user_guid, display_name FROM site_users")
         .fetch_all(&mut conn)
         .await
         .unwrap()

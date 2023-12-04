@@ -55,6 +55,12 @@ pub struct UILoginUser {
     pub password: String,
 }
 
+#[derive(Serialize)]
+pub struct UIDisplayUser {
+    pub user_guid: String,
+    pub display_name: String
+}
+
 pub struct UserCredentials {
     pub username: String,
     pub password_hash: String,

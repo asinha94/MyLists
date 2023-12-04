@@ -81,13 +81,14 @@ async fn delete_item(body: web::Json<api::UIItem>) -> impl Responder {
 
 #[get("/api/users")]
 async fn get_all_users() -> impl Responder {
+    let users: Vec<_> = sql::get_all_users().await
+        .iter()
+        .map(|x| api::UIDisplayUser {
+            user_guid: x.user_guid.clone(),
+            display_name: x.display_name.clone()
+        }).collect();
 
-    //let users_passwords = sql::get_all_users().await;
-    // Need to only get the passwords
-    //let users = user
-    
-    
-    serde_json::to_string("").unwrap()
+    serde_json::to_string(&users).unwrap()
 }
 
 
@@ -250,6 +251,7 @@ async fn main() -> std::io::Result<()>{
         App::new()
         .app_data(shared_data.clone())
         .service(get_all_items)
+        .service(get_all_users)
         .service(reorder_item)
         .service(insert_item)
         .service(update_item_title)
