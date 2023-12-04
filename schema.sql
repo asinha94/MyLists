@@ -9,8 +9,11 @@ CREATE TABLE site_users (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     username TEXT NOT NULL,
     password_hash TEXT NOT NULL,
+    display_name TEXT NOT NULL,
+    user_guid TEXT DEFAULT gen_random_uuid(),
     CONSTRAINT siteusers_pk PRIMARY KEY(id),
-    CONSTRAINT siteusers_username_uk UNIQUE (username)
+    CONSTRAINT siteusers_username_uk UNIQUE (username),
+    CONSTRAINT siteusers_userguid_uk UNIQUE(user_guid)
 );
 
 CREATE TABLE categories (

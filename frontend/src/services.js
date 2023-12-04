@@ -143,8 +143,8 @@ export async function deleteItem(item) {
 }
 
 
-export async function registerUser(username, password, malformedPasswordMsg) {
-  const credentials = {username: username, password: password}
+export async function registerUser(displayname, username, password, malformedPasswordMsg) {
+  const credentials = {displayname: displayname, username: username, password: password}
   try {
     const response = await fetch(API_URL + '/register', {
       method: 'POST',

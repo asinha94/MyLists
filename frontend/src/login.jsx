@@ -134,6 +134,7 @@ function SignUp({tabIndex, index, handleClose}) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
 
+    const displayname = data.get('displayname');
     const username = data.get('username');
     const pw1 = data.get('password');
     const pw2 = data.get('confirm-password');
@@ -155,7 +156,7 @@ function SignUp({tabIndex, index, handleClose}) {
       return false;
     }
 
-    registerUser(username, pw1, PASSWORD_VALIDATION_MSG).then(registerResponse => {
+    registerUser(displayname, username, pw1, PASSWORD_VALIDATION_MSG).then(registerResponse => {
       if (registerResponse === null) {
         return;
       }
@@ -213,6 +214,16 @@ function SignUp({tabIndex, index, handleClose}) {
   return (
     <div hidden={tabIndex !== index}>
       <Box component="form" onSubmit={handleRegisterSubmit} sx={{ mt: 1 }}>
+      <TextField
+          margin="normal"
+          required
+          fullWidth
+          id="displayname"
+          label="Display Name"
+          name="displayname"
+          autoComplete="name"
+          autoFocus
+        />
         <TextField
           margin="normal"
           required

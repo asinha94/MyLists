@@ -79,6 +79,17 @@ async fn delete_item(body: web::Json<api::UIItem>) -> impl Responder {
     serde_json::to_string(&item).unwrap()
 }
 
+#[get("/api/users")]
+async fn get_all_users() -> impl Responder {
+
+    //let users_passwords = sql::get_all_users().await;
+    // Need to only get the passwords
+    //let users = user
+    
+    
+    serde_json::to_string("").unwrap()
+}
+
 
 #[get("/api/items")]
 async fn get_all_items() -> impl Responder {
@@ -106,7 +117,7 @@ async fn get_all_items() -> impl Responder {
 
 
 #[post("/api/register")]
-async fn register_new_user(body: web::Json<api::UIUser>, state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
+async fn register_new_user(body: web::Json<api::UIRegisterUser>, state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
 
     match session.get::<String>("authToken").unwrap() {
         None => (),
@@ -117,6 +128,7 @@ async fn register_new_user(body: web::Json<api::UIUser>, state_data: web::Data<a
     }
 
     let data = body.0;
+    let displayname = data.displayname;
     let username = data.username;
     let password = data.password;
 
@@ -125,7 +137,7 @@ async fn register_new_user(body: web::Json<api::UIUser>, state_data: web::Data<a
     }
 
     let password_hash = utils::login::create_hashed_password(&password);
-    let e = sql::insert_user(&username, &password_hash).await;
+    let e = sql::insert_user(&displayname, &username, &password_hash).await;
     
     // Check for conflict
     match e {
@@ -149,7 +161,7 @@ async fn register_new_user(body: web::Json<api::UIUser>, state_data: web::Data<a
 
 
 #[post("/api/login")]
-async fn login(body: web::Json<api::UIUser>, state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
+async fn login(body: web::Json<api::UILoginUser>, state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
     let data = body.0;
     let username = data.username;
     let password = data.password;
@@ -174,7 +186,7 @@ async fn login(body: web::Json<api::UIUser>, state_data: web::Data<app::AppState
     
     // Generate an AuthToken Cookie for the user
     let api_key = api::generate_api_key();
-    app_data.user_by_token.insert(api_key.clone(), username);
+    app_data.username_by_token.insert(api_key.clone(), username);
 
     // Insert into Cookie Session i.e Add to Set-Cookie Header
     match session.insert("authToken", api_key) {
@@ -219,7 +231,7 @@ async fn main() -> std::io::Result<()>{
 
 
     // Get all users from DB and collect into HashMap
-    let all_users = sql::get_all_users().await;
+    let all_users = sql::get_all_users_credentials().await;
     let all_users = all_users.iter()
         .map(|x| (x.username.clone(), api::UserCredentials::new(&x)))
         .collect::<HashMap<String, api::UserCredentials>>();
@@ -228,7 +240,7 @@ async fn main() -> std::io::Result<()>{
     let shared_data = web::Data::new(
         app::AppState {
             app_data: Mutex::new(app::AppData {
-                user_by_token: HashMap::new(),
+                username_by_token: HashMap::new(),
                 user_by_username: all_users
             })
         }

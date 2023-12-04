@@ -1,7 +1,7 @@
 use cookie::Key;
 use serde::{Deserialize, Serialize};
 
-use crate::sql::{DBItem, DBUser};
+use crate::sql::{DBItem, DBCredentialUser};
 use base64::{Engine as _, engine::general_purpose};
 
 #[derive(Serialize, Deserialize)]
@@ -43,11 +43,17 @@ pub struct ChangeDelta {
 
 
 #[derive(Serialize, Deserialize)]
-pub struct UIUser {
+pub struct UIRegisterUser {
+    pub displayname: String,
     pub username: String,
     pub password: String,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct UILoginUser {
+    pub username: String,
+    pub password: String,
+}
 
 pub struct UserCredentials {
     pub username: String,
@@ -55,7 +61,7 @@ pub struct UserCredentials {
 }
 
 impl UserCredentials {
-    pub fn new(user: &DBUser) -> UserCredentials {
+    pub fn new(user: &DBCredentialUser) -> UserCredentials {
         UserCredentials {
             username: user.username.clone(),
             password_hash: user.password_hash.clone()
