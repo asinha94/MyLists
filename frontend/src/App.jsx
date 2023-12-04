@@ -23,7 +23,7 @@ export default function App() {
   // Users to display
   const [users, setUsers] = useState([]);
   const [loggedInUser, setLoggedInUser] = useState({})
-  const [selectedUser, setSelectedUser] = useState({});
+  const [selectedUser, setSelectedUser] = useState({user_guid: '0', display_name: 'nothing_yet'});
 
   // All the data used per user. Might want to switch to its own component
   // for persistence so we dont need a GET each time

@@ -161,7 +161,7 @@ export default function SearchAppBar({users, categories, selectedCategory, setSe
   const [open, setOpen] = useState(false);
 
   const displayName = selectedUser.display_name;
-  const appostrophe_s = displayName[displayName.length-1] === 's' ? '' : 's';
+  const appostrophe_s = displayName[displayName.length - 1] === 's' ? '' : 's';
   const listTitle = `${displayName}'${appostrophe_s} List`
 
   const handleDrawerOpen = () => {
