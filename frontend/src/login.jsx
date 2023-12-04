@@ -39,8 +39,8 @@ function SignIn({tabIndex, index, handleClose}) {
     }
 
     if (!passwordSuccessfullInputValidation(password)) {
-      failedUsername(username);
-      failedPassword(password);
+      setFailedUsername(username);
+      setFailedPassword(password);
       setPasswordErrorText(PASSWORD_VALIDATION_MSG);
       return false;
     }
@@ -56,8 +56,8 @@ function SignIn({tabIndex, index, handleClose}) {
         return true;
       }
 
-      failedUsername(username);
-      failedPassword(password);
+      setFailedUsername(username);
+      setFailedPassword(password);
       setPasswordErrorText(result.authFailReason);
 
     });
