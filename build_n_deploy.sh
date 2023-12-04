@@ -13,9 +13,9 @@ cargo build --release
 sudo service backend restart
 popd
 
-
 # Build the frontend
 pushd frontend
+npm install
 npm run build
 sudo service nginx restart
 popd

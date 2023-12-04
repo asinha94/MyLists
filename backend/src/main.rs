@@ -79,12 +79,22 @@ async fn delete_item(body: web::Json<api::UIItem>) -> impl Responder {
     serde_json::to_string(&item).unwrap()
 }
 
+#[get("/api/users")]
+async fn get_all_users() -> impl Responder {
+    let users: Vec<_> = sql::get_all_users().await
+        .iter()
+        .map(|x| api::UIDisplayUser {
+            user_guid: x.user_guid.clone(),
+            display_name: x.display_name.clone()
+        }).collect();
+
+    serde_json::to_string(&users).unwrap()
+}
+
 
 #[get("/api/items")]
-async fn get_all_items() -> impl Responder {
-
-    let username = "asinha".to_string();
-    let items = sql::get_all_items(&username).await;
+async fn get_all_items(user: web::Query<api::UIGetItemUser>) -> impl Responder {
+    let items = sql::get_all_user_items(&user.userGuid).await;
     // Create dict lists from list of dicts
     let mut data = HashMap::new();
     for item in items {
@@ -106,7 +116,7 @@ async fn get_all_items() -> impl Responder {
 
 
 #[post("/api/register")]
-async fn register_new_user(body: web::Json<api::UIUser>, state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
+async fn register_new_user(body: web::Json<api::UIRegisterUser>, state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
 
     match session.get::<String>("authToken").unwrap() {
         None => (),
@@ -117,6 +127,7 @@ async fn register_new_user(body: web::Json<api::UIUser>, state_data: web::Data<a
     }
 
     let data = body.0;
+    let displayname = data.displayname;
     let username = data.username;
     let password = data.password;
 
@@ -125,7 +136,7 @@ async fn register_new_user(body: web::Json<api::UIUser>, state_data: web::Data<a
     }
 
     let password_hash = utils::login::create_hashed_password(&password);
-    let e = sql::insert_user(&username, &password_hash).await;
+    let e = sql::insert_user(&displayname, &username, &password_hash).await;
     
     // Check for conflict
     match e {
@@ -149,7 +160,7 @@ async fn register_new_user(body: web::Json<api::UIUser>, state_data: web::Data<a
 
 
 #[post("/api/login")]
-async fn login(body: web::Json<api::UIUser>, state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
+async fn login(body: web::Json<api::UILoginUser>, state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
     let data = body.0;
     let username = data.username;
     let password = data.password;
@@ -174,7 +185,7 @@ async fn login(body: web::Json<api::UIUser>, state_data: web::Data<app::AppState
     
     // Generate an AuthToken Cookie for the user
     let api_key = api::generate_api_key();
-    app_data.user_by_token.insert(api_key.clone(), username);
+    app_data.username_by_token.insert(api_key.clone(), username);
 
     // Insert into Cookie Session i.e Add to Set-Cookie Header
     match session.insert("authToken", api_key) {
@@ -187,15 +198,7 @@ async fn login(body: web::Json<api::UIUser>, state_data: web::Data<app::AppState
 }
 
 
-fn session_middleware() -> SessionMiddleware<CookieSessionStore> {
-    /* Key::generate() */
-    let is_prod: bool = env::var("APP_DEV_ENV").is_err();
-    let default_cookie_key = String::from("gjFIiSwMlxg+hPgn16du3JKI09Dk6ChZX8bvy8hhoy3NpU/yLSSrVXI/7BnfMC+oz9wx7wyxe0kn7+X6PaZdZA==");
-    let cookie_secret_key = env::var("APP_COOKIE_SECRET").unwrap_or(default_cookie_key);
-    if !is_prod {
-        println!("WARNING: Running DEV Server!. Cookie Secret: {cookie_secret_key}");
-    }
-
+fn session_middleware(is_prod: bool, cookie_secret_key: String) -> SessionMiddleware<CookieSessionStore> {
     let cookie_secret_key_decoded = general_purpose::STANDARD.decode(cookie_secret_key).unwrap();
     let key = Key::from(&cookie_secret_key_decoded);
 
@@ -217,11 +220,17 @@ fn session_middleware() -> SessionMiddleware<CookieSessionStore> {
 #[actix_web::main]
 async fn main() -> std::io::Result<()>{
     let is_prod: bool = env::var("APP_DEV_ENV").is_err();
+    let default_cookie_key = String::from("gjFIiSwMlxg+hPgn16du3JKI09Dk6ChZX8bvy8hhoy3NpU/yLSSrVXI/7BnfMC+oz9wx7wyxe0kn7+X6PaZdZA==");
+    let cookie_secret_key = env::var("APP_COOKIE_SECRET").unwrap_or(default_cookie_key);
+    if !is_prod {
+        println!("WARNING: Running DEV Server!. Cookie Secret: {cookie_secret_key}");
+    }
+
     env_logger::init_from_env(Env::default().default_filter_or("debug"));
 
 
     // Get all users from DB and collect into HashMap
-    let all_users = sql::get_all_users().await;
+    let all_users = sql::get_all_users_credentials().await;
     let all_users = all_users.iter()
         .map(|x| (x.username.clone(), api::UserCredentials::new(&x)))
         .collect::<HashMap<String, api::UserCredentials>>();
@@ -230,7 +239,7 @@ async fn main() -> std::io::Result<()>{
     let shared_data = web::Data::new(
         app::AppState {
             app_data: Mutex::new(app::AppData {
-                user_by_token: HashMap::new(),
+                username_by_token: HashMap::new(),
                 user_by_username: all_users
             })
         }
@@ -240,6 +249,7 @@ async fn main() -> std::io::Result<()>{
         App::new()
         .app_data(shared_data.clone())
         .service(get_all_items)
+        .service(get_all_users)
         .service(reorder_item)
         .service(insert_item)
         .service(update_item_title)
@@ -248,7 +258,7 @@ async fn main() -> std::io::Result<()>{
         .service(login)
         .wrap(Cors::permissive())
         .wrap(Logger::default())
-        .wrap(session_middleware())
+        .wrap(session_middleware(is_prod, cookie_secret_key.clone()))
     })
     .bind((HOST, PORT))?
     .run()

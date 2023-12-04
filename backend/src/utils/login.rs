@@ -51,13 +51,16 @@ pub fn create_hashed_password(password: &String) -> String {
     password_hash
 }
 
+
+
+
+
 #[allow(dead_code)]
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
 
+    // Get Username
     let mut username = String::new();
-    //let mut password = String::new();
-
     print!("Enter username: ");
     std::io::stdout().flush().unwrap();
 
@@ -65,6 +68,15 @@ async fn main() -> std::io::Result<()> {
         .read_line(&mut username)
         .unwrap();
     username = username.trim().to_string();
+
+    let mut displayname = String::new();
+    print!("Enter Display Name: ");
+    std::io::stdout().flush().unwrap();
+
+    std::io::stdin()
+        .read_line(&mut displayname)
+        .unwrap();
+    displayname = displayname.trim().to_string();
 
     let password = loop {
         let password = rpassword::prompt_password("Enter password: ").unwrap();
@@ -75,7 +87,7 @@ async fn main() -> std::io::Result<()> {
     };
     
     let password_hash = create_hashed_password(&password);
-    match sql::insert_user(&username, &password_hash).await {
+    match sql::insert_user(&displayname, &username, &password_hash).await {
         Ok(_) => (),
         Err(e) => println!("Postrges Error: {e}")
     };
