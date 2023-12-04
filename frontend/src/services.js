@@ -148,7 +148,6 @@ export async function registerUser(username, password, malformedPasswordMsg) {
   try {
     const response = await fetch(API_URL + '/register', {
       method: 'POST',
-      'credentials': 'include',
       headers: {
         'Accept': 'appplication/json',
         'Content-Type': 'application/json'
@@ -157,7 +156,6 @@ export async function registerUser(username, password, malformedPasswordMsg) {
       }
     );
 
-    
     const registerUpdateData = {
       authorized: false,
       authFailReason: null,
@@ -191,6 +189,50 @@ export async function registerUser(username, password, malformedPasswordMsg) {
       // Unexpected Error
       console.log("Recieved error while trying to register user: " + response.status + " " + response.statusText);
       registerUpdateData.authReason = response.statusText;
+    }
+
+    return registerUpdateData;
+
+  } catch(err) {
+    console.log(err.message);
+    return null;
+  }
+}
+
+
+export async function loginUser(username, password) {
+  const credentials = {username: username, password: password}
+  try {
+    const response = await fetch(API_URL + '/login', {
+      method: 'POST',
+      'credentials': 'include',
+      headers: {
+        'Accept': 'appplication/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(credentials)
+      }
+    );
+
+    
+    const registerUpdateData = {
+      authorized: false,
+      authorizedUsername: username,
+      authFailReason: null,
+    }
+
+    if (response.ok) {
+      registerUpdateData.authorized = true;
+    }
+    
+    // 401 Generic unauthorized failure message
+    else if (response.status === 401) {
+      
+      // Unexpected Error
+      if (response.status !== 401) {
+        console.log("Recieved error while trying to register user: " + response.status + " " + response.statusText);
+      }
+      registerUpdateData.authFailReason = 'Failed to validate credentials';
     }
 
     return registerUpdateData;

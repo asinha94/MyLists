@@ -1,8 +1,9 @@
-alter table categories drop constraint categories_category_title_uk;
-alter table categories drop constraint categories_pk cascase;
 alter table items drop constraint items_title_uk;
 alter table items drop constraint items_pk cascade;
+alter table items drop constraint items_categories_fk;
 alter table items RENAME TO olditems;
+alter table categories drop constraint categories_category_title_uk;
+alter table categories drop constraint categories_pk cascade;
 alter table categories RENAME TO oldcategories;
 
 -- Create new tables here

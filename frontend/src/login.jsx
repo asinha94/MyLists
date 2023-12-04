@@ -7,8 +7,7 @@ import DialogContent from '@mui/material/DialogContent';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 // App
-import { registerUser } from './services'
-import { setCookie } from './utilities'
+import { registerUser, loginUser } from './services'
 
 const MIN_PASSWORD_LENGTH = 8;
 const PASSWORD_NO_MATCH_MSG = "Passwords must match";
@@ -25,12 +24,67 @@ function passwordSuccessfullInputValidation(password) {
 }
 
 function SignIn({tabIndex, index, handleClose}) {
+  const [failedPassword, setFailedPassword] = React.useState('');
+  const [failedUsername, setFailedUsername] = React.useState('');
+  const [passwordHelperText, setPasswordErrorText] = React.useState('');
+
   const handleSubmitLogin = (event) => {
     event.preventDefault();
-    //const data = new FormData(event.currentTarget); 
-    //const username = data.get('username');
-    //const pw1 = data.get('password');
+    const data = new FormData(event.currentTarget); 
+    const username = data.get('username');
+    const password = data.get('password');
+    
+    if (username === failedUsername && password === failedPassword) {
+      return false;
+    }
+
+    if (!passwordSuccessfullInputValidation(password)) {
+      failedUsername(username);
+      failedPassword(password);
+      setPasswordErrorText(PASSWORD_VALIDATION_MSG);
+      return false;
+    }
+
+    loginUser(username, password).then(result => {
+      if (result === null) {
+        return false;
+      }
+
+      if (result.authorized) {
+        // TODO: trigger login flow from here
+        handleClose();
+        return true;
+      }
+
+      failedUsername(username);
+      failedPassword(password);
+      setPasswordErrorText(result.authFailReason);
+
+    });
+    
+    
     handleClose();
+  };
+
+
+  const handleUsernameChange = (event) => {
+    const usernameValue = event.target.value;
+    // Set helper message if password doesnt validate correctly
+    if (failedUsername && usernameValue !== failedUsername) {
+      setFailedPassword('');
+      setFailedUsername('');
+      setPasswordErrorText('');
+    }
+  }
+
+  const handlePasswordChange = (event) => {
+    const passwordValue = event.target.value;
+    // Set helper message if password doesnt validate correctly
+    if (failedPassword && passwordValue !== failedPassword) {
+      setFailedPassword('');
+      setFailedUsername('');
+      setPasswordErrorText('');
+    }
   };
 
   return (
@@ -44,6 +98,7 @@ function SignIn({tabIndex, index, handleClose}) {
             label="Username"
             name="username"
             autoComplete="username"
+            onChange={handleUsernameChange}
             autoFocus
           />
           <TextField
@@ -55,7 +110,10 @@ function SignIn({tabIndex, index, handleClose}) {
             type="password"
             id="password"
             autoComplete="current-password"
+            onChange={handlePasswordChange}
             inputProps={{ minLength: MIN_PASSWORD_LENGTH }}
+            helperText={passwordHelperText}
+            error={passwordHelperText!==""}
           />
           <Button type="submit" fullWidth variant="contained">Login</Button>
       </Box>

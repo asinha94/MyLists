@@ -187,15 +187,7 @@ async fn login(body: web::Json<api::UIUser>, state_data: web::Data<app::AppState
 }
 
 
-fn session_middleware() -> SessionMiddleware<CookieSessionStore> {
-    /* Key::generate() */
-    let is_prod: bool = env::var("APP_DEV_ENV").is_err();
-    let default_cookie_key = String::from("gjFIiSwMlxg+hPgn16du3JKI09Dk6ChZX8bvy8hhoy3NpU/yLSSrVXI/7BnfMC+oz9wx7wyxe0kn7+X6PaZdZA==");
-    let cookie_secret_key = env::var("APP_COOKIE_SECRET").unwrap_or(default_cookie_key);
-    if !is_prod {
-        println!("WARNING: Running DEV Server!. Cookie Secret: {cookie_secret_key}");
-    }
-
+fn session_middleware(is_prod: bool, cookie_secret_key: String) -> SessionMiddleware<CookieSessionStore> {
     let cookie_secret_key_decoded = general_purpose::STANDARD.decode(cookie_secret_key).unwrap();
     let key = Key::from(&cookie_secret_key_decoded);
 
@@ -217,6 +209,12 @@ fn session_middleware() -> SessionMiddleware<CookieSessionStore> {
 #[actix_web::main]
 async fn main() -> std::io::Result<()>{
     let is_prod: bool = env::var("APP_DEV_ENV").is_err();
+    let default_cookie_key = String::from("gjFIiSwMlxg+hPgn16du3JKI09Dk6ChZX8bvy8hhoy3NpU/yLSSrVXI/7BnfMC+oz9wx7wyxe0kn7+X6PaZdZA==");
+    let cookie_secret_key = env::var("APP_COOKIE_SECRET").unwrap_or(default_cookie_key);
+    if !is_prod {
+        println!("WARNING: Running DEV Server!. Cookie Secret: {cookie_secret_key}");
+    }
+
     env_logger::init_from_env(Env::default().default_filter_or("debug"));
 
 
@@ -248,7 +246,7 @@ async fn main() -> std::io::Result<()>{
         .service(login)
         .wrap(Cors::permissive())
         .wrap(Logger::default())
-        .wrap(session_middleware())
+        .wrap(session_middleware(is_prod, cookie_secret_key.clone()))
     })
     .bind((HOST, PORT))?
     .run()
