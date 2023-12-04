@@ -5,6 +5,7 @@ mod app;
 pub mod utils;
 
 use std::sync::Mutex;
+use std::env;
 use std::collections::HashMap;
 use actix_session::{config::{PersistentSession, CookieContentSecurity}, Session};
 use env_logger::Env;
@@ -15,7 +16,6 @@ use actix_session::storage::CookieSessionStore;
 use actix_web::cookie::Key;
 use base64::{Engine as _, engine::general_purpose};
 use serde_json;
-//use cookie;
 
 const HOST: &str = "0.0.0.0";
 const PORT: u16 = 8000;
@@ -79,6 +79,7 @@ async fn delete_item(body: web::Json<api::UIItem>) -> impl Responder {
     serde_json::to_string(&item).unwrap()
 }
 
+
 #[get("/api/items")]
 async fn get_all_items() -> impl Responder {
 
@@ -105,7 +106,7 @@ async fn get_all_items() -> impl Responder {
 
 
 #[post("/api/register")]
-async fn register_new_user(body: web::Json<api::UIRegisterUser>, state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
+async fn register_new_user(body: web::Json<api::UIUser>, state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
 
     match session.get::<String>("authToken").unwrap() {
         None => (),
@@ -114,7 +115,6 @@ async fn register_new_user(body: web::Json<api::UIRegisterUser>, state_data: web
             return HttpResponse::NotAcceptable();
         }
     }
-
 
     let data = body.0;
     let username = data.username;
@@ -134,21 +134,54 @@ async fn register_new_user(body: web::Json<api::UIRegisterUser>, state_data: web
             HttpResponse::Conflict()
         },
         _ => {
-            let cookie_api_key = Key::generate();
-            let cookie_api_key_bytes = cookie_api_key.master();
-            let api_key = general_purpose::STANDARD.encode(cookie_api_key_bytes);
-            let mut shared_data = state_data.app_data.lock().unwrap();
-            // This invalidates the previous key. Might want to keep a list
-            //shared_data.insert(api_key.clone(), username.clone());
+            // Insert the user into our cache, then force the user to re-login
+            // To get their cookie
+            let mut app_data = state_data.app_data.lock().unwrap();
+            app_data.user_by_username.insert(username.clone(), api::UserCredentials {
+                username: username,
+                password_hash: password_hash
+            });
 
-            match session.insert("authToken", api_key) {
-                Ok(_) =>  HttpResponse::Ok(),
-                Err(e) => {
-                    println!("Failed to set cookie: {e}");
-                    HttpResponse::InternalServerError()
-                }
-            }
-           
+            HttpResponse::Ok()
+        }
+    }
+}
+
+
+#[post("/api/login")]
+async fn login(body: web::Json<api::UIUser>, state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
+    let data = body.0;
+    let username = data.username;
+    let password = data.password;
+
+    if !utils::login::password_is_valid(&password) {
+        return HttpResponse::Unauthorized();
+    }
+
+    let mut app_data = state_data.app_data.lock().unwrap();
+    let user = app_data.user_by_username.get(&username);
+    
+    // User Unknown. Eventually replace with Redis + DB
+    if user.is_none() {
+        return HttpResponse::Unauthorized();
+    }
+
+    // Check if password matches the hash
+    let user = user.unwrap();
+    if !utils::login::password_hashes_to_phc(&password, &user.password_hash) {
+        return HttpResponse::Unauthorized();
+    }
+    
+    // Generate an AuthToken Cookie for the user
+    let api_key = api::generate_api_key();
+    app_data.user_by_token.insert(api_key.clone(), username);
+
+    // Insert into Cookie Session i.e Add to Set-Cookie Header
+    match session.insert("authToken", api_key) {
+        Ok(_) => HttpResponse::Ok(),
+        Err(e) => {
+            println!("Failed to set cookie: {e}");
+            HttpResponse::InternalServerError()
         }
     }
 }
@@ -156,17 +189,26 @@ async fn register_new_user(body: web::Json<api::UIRegisterUser>, state_data: web
 
 fn session_middleware() -> SessionMiddleware<CookieSessionStore> {
     /* Key::generate() */
-    let cookie_secret_key = "gjFIiSwMlxg+hPgn16du3JKI09Dk6ChZX8bvy8hhoy3NpU/yLSSrVXI/7BnfMC+oz9wx7wyxe0kn7+X6PaZdZA==";
-    let cookie_secret_key_decoded = general_purpose::STANDARD.decode(cookie_secret_key)
-        .unwrap();
+    let is_prod: bool = env::var("APP_DEV_ENV").is_err();
+    let default_cookie_key = String::from("gjFIiSwMlxg+hPgn16du3JKI09Dk6ChZX8bvy8hhoy3NpU/yLSSrVXI/7BnfMC+oz9wx7wyxe0kn7+X6PaZdZA==");
+    let cookie_secret_key = env::var("APP_COOKIE_SECRET").unwrap_or(default_cookie_key);
+    if !is_prod {
+        println!("WARNING: Running DEV Server!. Cookie Secret: {cookie_secret_key}");
+    }
+
+    let cookie_secret_key_decoded = general_purpose::STANDARD.decode(cookie_secret_key).unwrap();
     let key = Key::from(&cookie_secret_key_decoded);
 
-    SessionMiddleware::builder(
+    let session = SessionMiddleware::builder(
         CookieSessionStore::default(), key)
-        .session_lifecycle(PersistentSession::default())
-        //.cookie_content_security(CookieContentSecurity::Private)
-        // Remove for prod
-        .cookie_content_security(CookieContentSecurity::Signed)
+        .session_lifecycle(PersistentSession::default());
+        
+        if is_prod {
+            return session.build();
+        }
+
+        // Remove for prod. Require SameSite, but thats OK since that means same domain, not same origin
+        session.cookie_content_security(CookieContentSecurity::Signed)
         .cookie_http_only(false)
         .cookie_secure(false)
         .build()
@@ -174,12 +216,23 @@ fn session_middleware() -> SessionMiddleware<CookieSessionStore> {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()>{
+    let is_prod: bool = env::var("APP_DEV_ENV").is_err();
     env_logger::init_from_env(Env::default().default_filter_or("debug"));
+
+
+    // Get all users from DB and collect into HashMap
+    let all_users = sql::get_all_users().await;
+    let all_users = all_users.iter()
+        .map(|x| (x.username.clone(), api::UserCredentials::new(&x)))
+        .collect::<HashMap<String, api::UserCredentials>>();
 
     // Use to share state between all requests
     let shared_data = web::Data::new(
         app::AppState {
-            app_data: Mutex::new(HashMap::new())
+            app_data: Mutex::new(app::AppData {
+                user_by_token: HashMap::new(),
+                user_by_username: all_users
+            })
         }
     );
 
@@ -192,6 +245,7 @@ async fn main() -> std::io::Result<()>{
         .service(update_item_title)
         .service(delete_item)
         .service(register_new_user)
+        .service(login)
         .wrap(Cors::permissive())
         .wrap(Logger::default())
         .wrap(session_middleware())

@@ -177,7 +177,7 @@ export async function registerUser(username, password, malformedPasswordMsg) {
 
     // 406, already authenticated
     else if (response.status === 406) {
-      registerUpdateData.authFailReason = 'username';
+      registerUpdateData.authFailReason = 'loggedin';
       registerUpdateData.authReason = 'Already logged in';
     }
 

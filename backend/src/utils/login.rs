@@ -33,14 +33,21 @@ pub fn password_is_valid(password: &String) -> bool {
 }
 
 
+pub fn password_hashes_to_phc(password: &String, password_hash: &String) -> bool {
+    let parsed_hash = PasswordHash::new(&password_hash).unwrap();
+    Argon2::default()
+        .verify_password(password.as_bytes(), &parsed_hash)
+        .is_ok()
+}
+
+
 pub fn create_hashed_password(password: &String) -> String {
     let salt = SaltString::generate(&mut OsRng);
     let argon2 = Argon2::default();
     let password_hash = argon2.hash_password(password.as_bytes(), &salt).unwrap().to_string();
     
     // Make sure hashing was successfull
-    let parsed_hash = PasswordHash::new(&password_hash).unwrap();
-    Argon2::default().verify_password(password.as_bytes(), &parsed_hash).unwrap();
+    password_hashes_to_phc(password, &password_hash);
     password_hash
 }
 
