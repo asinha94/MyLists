@@ -17,7 +17,6 @@ impl UserCredentials {
             password_hash: user.password_hash.clone(),
             user_guid: user.user_guid.clone()
         }
-        
     }
 }
 

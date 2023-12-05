@@ -22,7 +22,7 @@ const darkTheme = createTheme({
 export default function App() {
   // Users to display
   const [users, setUsers] = useState([]);
-  const [loggedInUser, setLoggedInUser] = useState({})
+  const [loggedInUser, setLoggedInUser] = useState({user_guid: '9c0d4b55-ce7b-4201-8b78-1abea097270', display_name: 'Anuraag'})
   const [selectedUser, setSelectedUser] = useState({user_guid: '0', display_name: 'Empty'});
 
   // All the data used per user. Might want to switch to its own component
@@ -73,7 +73,10 @@ export default function App() {
       // Store users list as a objects, sorted by display name
       const usersSortedByDisplayName = userInfo.sort(usersCmp);
       setUsers(usersSortedByDisplayName);
-      setSelectedUser(usersSortedByDisplayName[0]);
+
+      if (selectedUser.user_guid === '0') {
+        setSelectedUser(usersSortedByDisplayName[0]);
+      }
 
     })
   }, []);
@@ -83,7 +86,7 @@ export default function App() {
     if (selectedUser) {
       const userGuid = selectedUser.user_guid;
       getUserItemData(userGuid).then(userData => {
-        if (userData) {
+        if (userData !== null) {
           setLoadedData(userData)
         }
       })

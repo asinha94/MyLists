@@ -61,9 +61,6 @@ function SignIn({tabIndex, index, handleClose}) {
       setPasswordErrorText(result.authFailReason);
 
     });
-    
-    
-    handleClose();
   };
 
 

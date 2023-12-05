@@ -151,11 +151,12 @@ async fn register_new_user(body: web::Json<api::UIRegisterUser>, state_data: web
             // To get their cookie. Send them their name/guid to update their frontend
             let mut app_data = state_data.app_data.lock().unwrap();
             let new_user = app::UserCredentials::new(&user);
+            app_data.user_by_username.insert(username, new_user);
+
             let ui_new_user = api::UIDisplayUser {
                 display_name: displayname,
                 user_guid: user.user_guid
             };
-            app_data.user_by_username.insert(username, new_user);
             HttpResponse::Ok()
                 .body(serde_json::to_string(&ui_new_user).unwrap())
         }
