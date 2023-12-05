@@ -59,59 +59,19 @@ function TitleBar({title, unit, verb, onNewItemSubmit}) {
 }
 
 
-function Column({column, searchValue, isDragDisabled, onNewItemSubmit, OnItemEditSet, OnItemDeleteConfirm}) {
-  const title = column.title;
-  const items = column.items;
-  const unit = column.unit;
-  const verb = column.verb;
+function Category({categoryData, searchValue, isDragDisabled}) {
+  const [data, setData] = useState(categoryData);
+
+  const title = data.title;
+  const items = data.items;
+  const unit = data.unit;
+  const verb = data.verb;
 
   const searchValueLowerCase = searchValue.toLowerCase();
   const indexedItems = items.map((item, index) => { return {'item': item, 'index': index} } );
   const displayItems = searchValue.length === 0 ? indexedItems : indexedItems.filter((entry) =>
     entry.item.content.toLowerCase().includes(searchValueLowerCase)
   );
-  
-  return (
-    <div style={columnStyle}>
-      <TitleBar
-        title={title}
-        unit={unit}
-        verb={verb}
-        onNewItemSubmit={onNewItemSubmit}
-      />
-      <Droppable droppableId={column.id} type={title}>
-        {(provided, snaphshot) => {
-          const style = {
-            ...provided.droppableProps.style,
-            ...itemListStyle
-          };
-
-          return (
-          <div
-            ref={provided.innerRef}
-            {...provided.droppableProps}
-            style={style}
-          >
-            {displayItems.map((entry) =>
-              <Item
-                key={entry.item.id}
-                item={entry.item}
-                index={entry.index}
-                title={title}
-                isDragDisabled={isDragDisabled}
-                OnItemEditSet={OnItemEditSet}
-                OnItemDeleteConfirm={OnItemDeleteConfirm}
-              />)}
-            {provided.placeholder}
-          </div>)
-        }}
-      </Droppable>
-    </div>
-  );
-}
-
-function Category({categoryData, searchValue, isDragDisabled}) {
-  const [data, setData] = useState(categoryData);
 
   const createChangeDelta = (newIndex, newItems) => {
     const emptyItem = {
@@ -253,22 +213,47 @@ function Category({categoryData, searchValue, isDragDisabled}) {
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <Column
-        key={data.id}
-        column={data}
-        //items={data.items}
-        searchValue={searchValue}
-        isDragDisabled={isDragDisabled}
-        onNewItemSubmit={onNewItemSubmit}
-        OnItemEditSet={OnItemEditSet}
-        OnItemDeleteConfirm={OnItemDeleteConfirm}
-      />
+      <div style={columnStyle}>
+        <TitleBar
+          title={title}
+          unit={unit}
+          verb={verb}
+          onNewItemSubmit={onNewItemSubmit}
+        />
+        <Droppable droppableId={data.id} type={title}>
+          {(provided, snaphshot) => {
+            const style = {
+              ...provided.droppableProps.style,
+              ...itemListStyle
+            };
+
+            return (
+            <div
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              style={style}
+            >
+              {displayItems.map((entry) =>
+                <Item
+                  key={entry.item.id}
+                  item={entry.item}
+                  index={entry.index}
+                  title={title}
+                  isDragDisabled={isDragDisabled}
+                  OnItemEditSet={OnItemEditSet}
+                  OnItemDeleteConfirm={OnItemDeleteConfirm}
+                />)}
+              {provided.placeholder}
+            </div>)
+          }}
+        </Droppable>
+      </div>
     </DragDropContext>
   );
 }
 
 
-export default function Columns({loadedData, categories, searchValue, isDragDisabled, selectedCategory}) {
+export default function Categories({loadedData, categories, searchValue, isDragDisabled, selectedCategory}) {
   if (isMobile) {
     if (selectedCategory) {
       const column = loadedData[selectedCategory];

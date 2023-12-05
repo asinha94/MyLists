@@ -6,7 +6,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 // Other
 import {isMobile} from 'react-device-detect';
 // The App
-import Columns from './Column'
+import Categories from './Column'
 import { getUserItemData, getAllUsers } from './services';
 import SearchAppBar from './AppBar';
 
@@ -101,7 +101,7 @@ export default function App() {
         handleUserLogin={handleUserLogin}
         loggedInUser={loggedInUser}
         />
-      <Columns
+      <Categories
         loadedData={loadedData}
         categories={categories}
         searchValue={searchValue}
