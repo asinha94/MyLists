@@ -156,7 +156,7 @@ pub async fn insert_user(displayname: &String, username: &String, password_hash:
     sqlx::query_as::<_, DBCredentialUser>("
         INSERT INTO site_users (display_name, username, password_hash)
         VALUES ($1, $2, $3)
-        RETURNING username, password_hash, user_guid")
+        RETURNING display_name, username, password_hash, user_guid")
         .bind(displayname)
         .bind(username)
         .bind(password_hash)

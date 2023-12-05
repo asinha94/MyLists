@@ -203,7 +203,6 @@ export async function registerUser(displayname, username, password, malformedPas
 
     else {
       // Unexpected Error
-      console.log("Recieved error while trying to register user: " + response.status + " " + response.statusText);
       registerUpdateData.authReason = response.statusText;
     }
 
@@ -248,6 +247,45 @@ export async function loginUser(username, password) {
     // 401 Generic unauthorized failure message
     else if (response.status === 401) {
       
+      // Unexpected Error
+      if (response.status !== 401) {
+        console.log("Recieved error while trying to register user: " + response.status + " " + response.statusText);
+      }
+      registerUpdateData.authFailReason = 'Failed to validate credentials';
+    }
+
+    return registerUpdateData;
+
+  } catch(err) {
+    console.log(err.message);
+    return null;
+  }
+}
+
+
+export async function loginUserOnStartup() {
+  try {
+    const response = await fetch(API_URL + '/autologin', {
+      method: 'POST',
+      'credentials': 'include'
+      }
+    );
+
+    const registerUpdateData = {
+      authorized: false,
+      authorizedUsername: null,
+      authFailReason: null,
+      authUser: null
+    }
+
+    if (response.ok) {
+      const newUser = await response.json();
+      registerUpdateData.authorized = true;
+      registerUpdateData.authUser = newUser;
+    }
+    
+    // 401 Generic unauthorized failure message
+    else if (response.status === 401) {
       // Unexpected Error
       if (response.status !== 401) {
         console.log("Recieved error while trying to register user: " + response.status + " " + response.statusText);

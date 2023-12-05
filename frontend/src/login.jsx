@@ -159,8 +159,7 @@ function SignUp({tabIndex, index, handleLoginPostRegister, handleNewUserRegister
       }
 
       if (registerResponse.authorized) {
-        // TODO: tell user to sign in again
-        handleNewUserRegister(registerResponse.newUser);
+        handleNewUserRegister(registerResponse.authUser);
         handleLoginPostRegister();
         return;
       }
