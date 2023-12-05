@@ -257,11 +257,11 @@ function Category({categoryData, searchValue, isDragDisabled}) {
 export default function Categories({loadedData, categories, searchValue, isDragDisabled, selectedCategory}) {
   if (isMobile) {
     if (selectedCategory) {
-      const column = loadedData[selectedCategory];
+      const categoryData = loadedData[selectedCategory];
       return (
         <Category
           key={selectedCategory}
-          categoryData={column}
+          categoryData={categoryData}
           isDragDisabled={isDragDisabled}
           searchValue={searchValue}
         />
