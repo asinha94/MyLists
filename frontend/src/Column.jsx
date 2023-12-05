@@ -228,23 +228,24 @@ function Category({categoryData, searchValue, isDragDisabled}) {
             };
 
             return (
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-              style={style}
-            >
-              {displayItems.map((entry) =>
-                <Item
-                  key={entry.item.id}
-                  item={entry.item}
-                  index={entry.index}
-                  title={title}
-                  isDragDisabled={isDragDisabled}
-                  OnItemEditSet={OnItemEditSet}
-                  OnItemDeleteConfirm={OnItemDeleteConfirm}
-                />)}
-              {provided.placeholder}
-            </div>)
+              <div
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                style={style}
+              >
+                {displayItems.map((entry) =>
+                  <Item
+                    key={entry.item.id}
+                    item={entry.item}
+                    index={entry.index}
+                    title={title}
+                    isDragDisabled={isDragDisabled}
+                    OnItemEditSet={OnItemEditSet}
+                    OnItemDeleteConfirm={OnItemDeleteConfirm}
+                  />)}
+                {provided.placeholder}
+              </div>
+            )
           }}
         </Droppable>
       </div>
