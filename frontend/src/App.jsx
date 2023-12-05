@@ -52,14 +52,11 @@ export default function App() {
   const handleNewUserRegister = (user) => {
     const newUsers = Array.from(users)
     newUsers.push(user)
-    console.log(newUsers);
-    
     setUsers(newUsers.sort(usersCmp));
   };
 
   const handleUserLogin = (user) => {
     setLoggedInUser(user);
-    console.log(user);
     setSelectedUser(user);
   }
 
