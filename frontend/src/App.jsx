@@ -76,6 +76,7 @@ export default function App() {
   
   // GET the full list from the API for a particular user
   useEffect(() => {
+    setLoadedData({});
     if (selectedUser.user_guid !== "0") {
       const userGuid = selectedUser.user_guid;
       getUserItemData(userGuid).then(userData => {

@@ -274,11 +274,11 @@ export default function Categories({loadedData, categories, searchValue, isDragD
   return (
     <div style={{display: "flex"}}>
       {categories.map(columnID => {
-          const column = loadedData[columnID];
+          const categoryData = loadedData[columnID];
           return (
             <Category
               key={columnID}
-              categoryData={column}
+              categoryData={categoryData}
               isDragDisabled={isDragDisabled}
               searchValue={searchValue}
             />
