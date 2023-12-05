@@ -26,7 +26,8 @@ pub struct DBItem {
 pub struct DBCredentialUser {
     pub username: String,
     pub password_hash: String,
-    pub user_guid: String
+    pub user_guid: String,
+    pub display_name: String
 }
 
 #[derive(sqlx::FromRow)]
@@ -53,7 +54,7 @@ pub async fn get_all_users_credentials() -> Vec<DBCredentialUser> {
     let mut conn = PgConnection::connect(&connuri).await.unwrap();
 
     sqlx::query_as::<_, DBCredentialUser>("
-        SELECT username, password_hash, user_guid FROM site_users")
+        SELECT username, password_hash, user_guid, display_name FROM site_users")
         .fetch_all(&mut conn)
         .await
         .unwrap()

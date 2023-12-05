@@ -209,7 +209,7 @@ async fn login(body: web::Json<api::UILoginUser>, state_data: web::Data<app::App
     let password = data.password;
 
     if !utils::login::password_is_valid(&password) {
-        return HttpResponse::Unauthorized();
+        return HttpResponse::Unauthorized().finish();
     }
 
     let mut app_data = state_data.app_data.lock().unwrap();
@@ -217,25 +217,31 @@ async fn login(body: web::Json<api::UILoginUser>, state_data: web::Data<app::App
     
     // User Unknown. Eventually replace with Redis + DB
     if user.is_none() {
-        return HttpResponse::Unauthorized();
+        return HttpResponse::Unauthorized().finish();
     }
 
     // Check if password matches the hash
     let user = user.unwrap();
     if !utils::login::password_hashes_to_phc(&password, &user.password_hash) {
-        return HttpResponse::Unauthorized();
+        return HttpResponse::Unauthorized().finish();
     }
-    
+
+    // Create object for frontend
+    let u = api::UIDisplayUser {
+        user_guid: user.user_guid.clone(),
+        display_name: user.display_name.clone()
+    };
+
     // Generate an AuthToken Cookie for the user
     let api_key = api::generate_api_key();
     app_data.username_by_token.insert(api_key.clone(), username);
 
     // Insert into Cookie Session i.e Add to Set-Cookie Header
     match session.insert("authToken", api_key) {
-        Ok(_) => HttpResponse::Ok(),
+        Ok(_) => HttpResponse::Ok().body(serde_json::to_string(&u).unwrap()),
         Err(e) => {
             println!("Failed to set cookie: {e}");
-            HttpResponse::InternalServerError()
+            HttpResponse::InternalServerError().finish()
         }
     }
 }

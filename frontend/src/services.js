@@ -173,12 +173,12 @@ export async function registerUser(displayname, username, password, malformedPas
       authorized: false,
       authFailReason: null,
       authReason: null,
-      newUser: null
+      authUser: null
     }
 
     if (response.ok) {
       const newUser = await response.json();
-      registerUpdateData.newUser = newUser;
+      registerUpdateData.authUser = newUser;
       registerUpdateData.authorized = true;
       registerUpdateData.authReason = 'New User Registered';
     }
@@ -235,10 +235,14 @@ export async function loginUser(username, password) {
       authorized: false,
       authorizedUsername: username,
       authFailReason: null,
+      authUser: null
     }
 
     if (response.ok) {
+      const newUser = await response.json();
       registerUpdateData.authorized = true;
+      registerUpdateData.authUser = newUser;
+      
     }
     
     // 401 Generic unauthorized failure message

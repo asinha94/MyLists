@@ -8,6 +8,7 @@ pub struct UserCredentials {
     pub username: String,
     pub password_hash: String,
     pub user_guid: String,
+    pub display_name: String,
 }
 
 impl UserCredentials {
@@ -15,7 +16,8 @@ impl UserCredentials {
         UserCredentials {
             username: user.username.clone(),
             password_hash: user.password_hash.clone(),
-            user_guid: user.user_guid.clone()
+            user_guid: user.user_guid.clone(),
+            display_name: user.display_name.clone(),
         }
     }
 }

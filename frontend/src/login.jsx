@@ -23,7 +23,7 @@ function passwordSuccessfullInputValidation(password) {
   return hasNumber && hasLowerCase && hasUpperCase && hasSpecialChars;
 }
 
-function SignIn({tabIndex, index, handleClose}) {
+function SignIn({tabIndex, index, handleClose, handleUserLogin}) {
   const [failedPassword, setFailedPassword] = React.useState('');
   const [failedUsername, setFailedUsername] = React.useState('');
   const [passwordHelperText, setPasswordErrorText] = React.useState('');
@@ -51,7 +51,7 @@ function SignIn({tabIndex, index, handleClose}) {
       }
 
       if (result.authorized) {
-        // TODO: trigger login flow from here
+        handleUserLogin(result.authUser);
         handleClose();
         return true;
       }
@@ -91,7 +91,7 @@ function SignIn({tabIndex, index, handleClose}) {
             margin="normal"
             required
             fullWidth
-            id="username"
+            id="signin-username"
             label="Username"
             name="username"
             autoComplete="username"
@@ -105,7 +105,7 @@ function SignIn({tabIndex, index, handleClose}) {
             name="password"
             label="Password"
             type="password"
-            id="password"
+            id="signin-password"
             autoComplete="current-password"
             onChange={handlePasswordChange}
             inputProps={{ minLength: MIN_PASSWORD_LENGTH }}
@@ -226,7 +226,7 @@ function SignUp({tabIndex, index, handleLoginPostRegister, handleNewUserRegister
           margin="normal"
           required
           fullWidth
-          id="username"
+          id="signup-username"
           label="Username"
           name="username"
           autoComplete="username"
@@ -242,7 +242,7 @@ function SignUp({tabIndex, index, handleLoginPostRegister, handleNewUserRegister
           name="password"
           label="Password"
           type="password"
-          id="password"
+          id="signup-password"
           inputProps={{ minLength: MIN_PASSWORD_LENGTH }}
           onChange={handlePasswordChange}
           helperText={passwordHelperText}
@@ -267,7 +267,7 @@ function SignUp({tabIndex, index, handleLoginPostRegister, handleNewUserRegister
 }
 
 
-export function LoginDialog({dialogOpen, setDialogOpen, handleDrawerClose, handleNewUserRegister}) {
+export function LoginDialog({dialogOpen, setDialogOpen, handleDrawerClose, handleNewUserRegister, handleUserLogin}) {
     const [tabIndex, setTabIndex] = React.useState(0);
   
     const handleTabIndexChange = (_, newIndex) => {
@@ -300,6 +300,7 @@ export function LoginDialog({dialogOpen, setDialogOpen, handleDrawerClose, handl
             index={0}
             tabIndex={tabIndex}
             handleClose={handleClose}
+            handleUserLogin={handleUserLogin}
           />
           <SignUp
             index={1}
