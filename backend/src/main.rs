@@ -79,6 +79,7 @@ async fn delete_item(body: web::Json<api::UIItem>) -> impl Responder {
     serde_json::to_string(&item).unwrap()
 }
 
+
 #[get("/api/users")]
 async fn get_all_users() -> impl Responder {
     let users: Vec<_> = sql::get_all_users().await
@@ -94,7 +95,7 @@ async fn get_all_users() -> impl Responder {
 
 #[get("/api/items")]
 async fn get_all_items(user: web::Query<api::UIGetItemUser>) -> impl Responder {
-    let items = sql::get_all_user_items(&user.userGuid).await;
+    let items = sql::get_all_user_items(&user.user_guid).await;
     // Create dict lists from list of dicts
     let mut data = HashMap::new();
     for item in items {
@@ -122,7 +123,7 @@ async fn register_new_user(body: web::Json<api::UIRegisterUser>, state_data: web
         None => (),
         Some(_) => {
             // I dont have a good reponse code for "Already Logged in"
-            return HttpResponse::NotAcceptable();
+            return HttpResponse::NotAcceptable().finish();
         }
     }
 
@@ -132,7 +133,7 @@ async fn register_new_user(body: web::Json<api::UIRegisterUser>, state_data: web
     let password = data.password;
 
     if !utils::login::password_is_valid(&password) {
-        return HttpResponse::BadRequest();
+        return HttpResponse::BadRequest().finish();
     }
 
     let password_hash = utils::login::create_hashed_password(&password);
@@ -141,21 +142,62 @@ async fn register_new_user(body: web::Json<api::UIRegisterUser>, state_data: web
     // Check for conflict
     match e {
         Err(e) => {
+            // Possible there are other errors. We should handle this better in general
             println!("{:?}", e);
-            HttpResponse::Conflict()
+            HttpResponse::Conflict().finish()
         },
-        _ => {
+        Ok(user) => {
             // Insert the user into our cache, then force the user to re-login
-            // To get their cookie
+            // To get their cookie. Send them their name/guid to update their frontend
             let mut app_data = state_data.app_data.lock().unwrap();
-            app_data.user_by_username.insert(username.clone(), api::UserCredentials {
-                username: username,
-                password_hash: password_hash
-            });
-
+            let new_user = app::UserCredentials::new(&user);
+            let ui_new_user = api::UIDisplayUser {
+                display_name: displayname,
+                user_guid: user.user_guid
+            };
+            app_data.user_by_username.insert(username, new_user);
             HttpResponse::Ok()
+                .body(serde_json::to_string(&ui_new_user).unwrap())
         }
     }
+}
+
+
+#[post("/api/autologin")]
+async fn autologin(state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
+
+    // Get cookie if available
+    let cookie = match session.get::<String>("authToken") {
+        Err(e) => {
+            println!("Unexpected error when checking session storage: {e}");
+            return HttpResponse::InternalServerError()
+                .body(format!("Cookie Session failure: {e}"));
+        },
+
+        Ok(cookie) => cookie
+    };
+
+    if cookie.is_none() {
+        return HttpResponse::Unauthorized().finish();
+    }
+
+    // Check session cache for cookie
+    let auth_token = cookie.unwrap();
+    let app_data = state_data.app_data.lock().unwrap();
+    let username = app_data.username_by_token.get(&auth_token);
+    
+    // User has an authentication token somehow, but we don't know about it (might have expired)
+    // Tell them to re-login
+    if username.is_none() {
+        return HttpResponse::Unauthorized()
+            .body(format!("Logged out of previous session!"));
+    }
+
+    //let user_data = app_data.user_by_username.get(&username);
+
+    HttpResponse::Ok().finish()
+
+
 }
 
 
@@ -232,8 +274,8 @@ async fn main() -> std::io::Result<()>{
     // Get all users from DB and collect into HashMap
     let all_users = sql::get_all_users_credentials().await;
     let all_users = all_users.iter()
-        .map(|x| (x.username.clone(), api::UserCredentials::new(&x)))
-        .collect::<HashMap<String, api::UserCredentials>>();
+        .map(|x| (x.username.clone(), app::UserCredentials::new(&x)))
+        .collect::<HashMap<String, app::UserCredentials>>();
 
     // Use to share state between all requests
     let shared_data = web::Data::new(

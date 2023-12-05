@@ -28,7 +28,7 @@ export async function getAllUsers() {
 export async function getUserItemData(userGuid) {  
   try {
     const response = await fetch(
-      API_URL + '/items?' + new URLSearchParams({userGuid: userGuid})
+      API_URL + '/items?' + new URLSearchParams({user_guid: userGuid})
     );
 
     if (!response.ok) {
@@ -173,9 +173,12 @@ export async function registerUser(displayname, username, password, malformedPas
       authorized: false,
       authFailReason: null,
       authReason: null,
+      newUser: null
     }
 
     if (response.ok) {
+      const newUser = await response.json();
+      registerUpdateData.newUser = newUser;
       registerUpdateData.authorized = true;
       registerUpdateData.authReason = 'New User Registered';
     }

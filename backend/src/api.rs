@@ -1,7 +1,7 @@
 use cookie::Key;
 use serde::{Deserialize, Serialize};
 
-use crate::sql::{DBItem, DBCredentialUser};
+use crate::sql::DBItem;
 use base64::{Engine as _, engine::general_purpose};
 
 #[derive(Serialize, Deserialize)]
@@ -63,22 +63,7 @@ pub struct UIDisplayUser {
 
 #[derive(Deserialize)]
 pub struct UIGetItemUser {
-    pub userGuid: String,
-}
-
-pub struct UserCredentials {
-    pub username: String,
-    pub password_hash: String,
-}
-
-impl UserCredentials {
-    pub fn new(user: &DBCredentialUser) -> UserCredentials {
-        UserCredentials {
-            username: user.username.clone(),
-            password_hash: user.password_hash.clone()
-        }
-        
-    }
+    pub user_guid: String,
 }
 
 

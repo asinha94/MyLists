@@ -143,7 +143,6 @@ function Category({categoryData, searchValue, isDragDisabled}) {
   };
 
   const onDragEnd = result => {
-    //console.log(result);
     const {destination, source} = result;
     // Dropped from list
     if (!destination) {

@@ -25,7 +25,8 @@ pub struct DBItem {
 #[derive(sqlx::FromRow)]
 pub struct DBCredentialUser {
     pub username: String,
-    pub password_hash: String
+    pub password_hash: String,
+    pub user_guid: String
 }
 
 #[derive(sqlx::FromRow)]
@@ -52,7 +53,7 @@ pub async fn get_all_users_credentials() -> Vec<DBCredentialUser> {
     let mut conn = PgConnection::connect(&connuri).await.unwrap();
 
     sqlx::query_as::<_, DBCredentialUser>("
-        SELECT username, password_hash FROM site_users")
+        SELECT username, password_hash, user_guid FROM site_users")
         .fetch_all(&mut conn)
         .await
         .unwrap()
@@ -146,17 +147,20 @@ pub async fn delete_item(id: i32) {
 
 
 pub async fn insert_user(displayname: &String, username: &String, password_hash: &String)
--> Result<sqlx::postgres::PgQueryResult, sqlx::Error>
+-> Result<DBCredentialUser, sqlx::Error>
  {
     let connuri = get_postgres_connect_uri();
     let mut conn = PgConnection::connect(&connuri).await.unwrap();
 
-    sqlx::query("
+    sqlx::query_as::<_, DBCredentialUser>("
         INSERT INTO site_users (display_name, username, password_hash)
-        VALUES ($1, $2, $3)")
+        VALUES ($1, $2, $3)
+        RETURNING username, password_hash, user_guid")
         .bind(displayname)
         .bind(username)
         .bind(password_hash)
-        .execute(&mut conn)
+        .fetch_one(&mut conn)
         .await
 }
+
+

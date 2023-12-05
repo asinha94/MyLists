@@ -110,7 +110,7 @@ function CategoryDropdown({categories, selectedCategory, setSelectedCategory}) {
 }
 
 
-function LoginSideDrawerItem({text, handleDrawerClose}) {
+function LoginSideDrawerItem({text, handleDrawerClose, handleNewUserRegister}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -127,6 +127,7 @@ function LoginSideDrawerItem({text, handleDrawerClose}) {
         dialogOpen={open}
         setDialogOpen={setOpen}
         handleDrawerClose={handleDrawerClose}
+        handleNewUserRegister={handleNewUserRegister}
       />
     </div>        
     
@@ -138,8 +139,6 @@ function UserSideDrawerItem({user, setSelectedUser, handleDrawerClose}) {
   const userGuid = user.user_guid;
   const userDisplayName = user.display_name;
 
-  const appostrophe_s = userDisplayName[userDisplayName.length-1] === 's' ? '' : 's';
-  const displayText = `${userDisplayName}'${appostrophe_s} List`
   const handleOnClick = () => {
     setSelectedUser(user);
     handleDrawerClose();
@@ -150,14 +149,14 @@ function UserSideDrawerItem({user, setSelectedUser, handleDrawerClose}) {
         <ListItemIcon>
           <AccountCircleIcon/>
         </ListItemIcon>
-        <ListItemText primary={displayText} />
+        <ListItemText primary={userDisplayName} />
       </ListItemButton>
     </ListItem>
   );
 }
 
   
-export default function SearchAppBar({users, categories, selectedCategory, setSelectedCategory, setSearchValue, selectedUser, setSelectedUser}) {
+export default function SearchAppBar({users, categories, selectedCategory, setSelectedCategory, setSearchValue, selectedUser, setSelectedUser, handleNewUserRegister}) {
   const [open, setOpen] = useState(false);
 
   const displayName = selectedUser.display_name;
@@ -171,8 +170,6 @@ export default function SearchAppBar({users, categories, selectedCategory, setSe
   const handleDrawerClose = () => {
     setOpen(false);
   }
-
-  
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -232,6 +229,7 @@ export default function SearchAppBar({users, categories, selectedCategory, setSe
         <LoginSideDrawerItem
           text="Login / Register"
           handleDrawerClose={handleDrawerClose}
+          handleNewUserRegister={handleNewUserRegister}
         />
         <Divider/>
         {users.map(user => 
