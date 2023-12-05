@@ -289,12 +289,15 @@ export default function Columns({loadedData, categories, searchValue, isDragDisa
     <div style={{display: "flex"}}>
       {categories.map(columnID => {
           const column = loadedData[columnID];
-          return <Category
-            key={columnID}
-            categoryData={column}
-            isDragDisabled={isDragDisabled}
-            searchValue={searchValue}
-          />
+          return (
+            <Category
+              key={columnID}
+              categoryData={column}
+              isDragDisabled={isDragDisabled}
+              searchValue={searchValue}
+            />
+          )
+          
         })}
     </div>
   )

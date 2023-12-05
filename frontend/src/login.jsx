@@ -164,11 +164,6 @@ function SignUp({tabIndex, index, handleLoginPostRegister, handleNewUserRegister
         return;
       }
 
-      if (registerResponse.authFailReason === "loggedin") {
-        // TODO: Trigger usual sign in flow
-        // This most likely cant happen
-      }
-
       if (registerResponse.authFailReason === 'username') {
         setFailedUsername(username);
         setUsernameHelperText(registerResponse.authReason);
