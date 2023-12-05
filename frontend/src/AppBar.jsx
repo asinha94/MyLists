@@ -110,7 +110,7 @@ function CategoryDropdown({categories, selectedCategory, setSelectedCategory}) {
 }
 
 
-function LoginSideDrawerItem({text, handleDrawerClose}) {
+function LoginSideDrawerItem({text, handleDrawerClose, handleNewUserRegister, handleUserLogin}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -127,6 +127,8 @@ function LoginSideDrawerItem({text, handleDrawerClose}) {
         dialogOpen={open}
         setDialogOpen={setOpen}
         handleDrawerClose={handleDrawerClose}
+        handleNewUserRegister={handleNewUserRegister}
+        handleUserLogin={handleUserLogin}
       />
     </div>        
     
@@ -138,8 +140,6 @@ function UserSideDrawerItem({user, setSelectedUser, handleDrawerClose}) {
   const userGuid = user.user_guid;
   const userDisplayName = user.display_name;
 
-  const appostrophe_s = userDisplayName[userDisplayName.length-1] === 's' ? '' : 's';
-  const displayText = `${userDisplayName}'${appostrophe_s} List`
   const handleOnClick = () => {
     setSelectedUser(user);
     handleDrawerClose();
@@ -150,29 +150,30 @@ function UserSideDrawerItem({user, setSelectedUser, handleDrawerClose}) {
         <ListItemIcon>
           <AccountCircleIcon/>
         </ListItemIcon>
-        <ListItemText primary={displayText} />
+        <ListItemText primary={userDisplayName} />
       </ListItemButton>
     </ListItem>
   );
 }
 
   
-export default function SearchAppBar({users, categories, selectedCategory, setSelectedCategory, setSearchValue, selectedUser, setSelectedUser}) {
+export default function SearchAppBar({users, categories, selectedCategory, setSelectedCategory, setSearchValue, selectedUser, setSelectedUser, handleNewUserRegister, handleUserLogin, loggedInUser}) {
   const [open, setOpen] = useState(false);
 
   const displayName = selectedUser.display_name;
   const appostrophe_s = displayName[displayName.length - 1] === 's' ? '' : 's';
   const listTitle = `${displayName}'${appostrophe_s} List`
+  const displayedUsers = users.filter(user => {
+    return loggedInUser === null || user.user_guid !== loggedInUser.user_guid
+  });
 
   const handleDrawerOpen = () => {
     setOpen(true);
-  }
+  };
 
   const handleDrawerClose = () => {
     setOpen(false);
-  }
-
-  
+  };
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -229,12 +230,25 @@ export default function SearchAppBar({users, categories, selectedCategory, setSe
           </IconButton>
         </DrawerHeader>
         <Divider/>
-        <LoginSideDrawerItem
-          text="Login / Register"
-          handleDrawerClose={handleDrawerClose}
-        />
+        {loggedInUser ? (
+          <UserSideDrawerItem
+            key={loggedInUser.user_guid}
+            user={loggedInUser}
+            setSelectedUser={setSelectedUser}
+            handleDrawerClose={handleDrawerClose}
+          />
+        ) : (
+          <LoginSideDrawerItem
+            text="Login / Register"
+            handleDrawerClose={handleDrawerClose}
+            handleNewUserRegister={handleNewUserRegister}
+            handleUserLogin={handleUserLogin}
+          />
+        )}
+
         <Divider/>
-        {users.map(user => 
+
+        {displayedUsers.map(user => 
           <UserSideDrawerItem
             key={user.user_guid}
             user={user}
