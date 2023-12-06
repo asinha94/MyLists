@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { styled, alpha } from '@mui/material/styles';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AppBar from '@mui/material/AppBar';
+import AddIcon from '@mui/icons-material/Add';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import Divider from '@mui/material/Divider';
@@ -26,6 +27,7 @@ import Select from '@mui/material/Select';
 import {isMobile} from 'react-device-detect';
 // The App
 import { LoginDialog } from './login'
+import { NewCategoryDialog } from './modals'
 
 
 const Search = styled('div')(({ theme }) => ({
@@ -159,6 +161,7 @@ function UserSideDrawerItem({user, setSelectedUser, handleDrawerClose}) {
   
 export default function SearchAppBar({users, categories, selectedCategory, setSelectedCategory, setSearchValue, selectedUser, setSelectedUser, handleNewUserRegister, handleUserLogin, loggedInUser}) {
   const [open, setOpen] = useState(false);
+  const [newCategoryOpen, SetNewCategoryOpen] = useState(false);
 
   const displayName = selectedUser.display_name;
   const appostrophe_s = displayName[displayName.length - 1] === 's' ? '' : 's';
@@ -175,6 +178,10 @@ export default function SearchAppBar({users, categories, selectedCategory, setSe
     setOpen(false);
   };
 
+  const plusOnClick = () => {
+    SetNewCategoryOpen(true);
+  };
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static" open={open}>
@@ -189,6 +196,16 @@ export default function SearchAppBar({users, categories, selectedCategory, setSe
           >
             <MenuIcon />
           </IconButton>
+
+          <IconButton aria-label="Example" onClick={plusOnClick}>
+            <AddIcon />
+          </IconButton>
+          <NewCategoryDialog
+            dialogOpen={newCategoryOpen}
+            setDialogOpen={SetNewCategoryOpen}
+            onNewCategorySubmit={() => {}}
+          />
+          
           <Typography
             variant="h6"
             noWrap

@@ -102,7 +102,7 @@ pub async fn insert_item(category: &String, title: &String, order_key: &String) 
         INSERT INTO items (category_id, title, order_key)
         SELECT id, $1, $2 FROM categories
         WHERE category_title = $3
-        ON CONFLICT (title) DO UPDATE
+        ON CONFLICT (category_id, title) DO UPDATE
         SET order_key = $4
         RETURNING id")
         .bind(title)
