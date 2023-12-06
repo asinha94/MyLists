@@ -201,6 +201,7 @@ export default function SearchAppBar({users, categories, selectedCategory, setSe
             <AddIcon />
           </IconButton>
           <NewCategoryDialog
+            categories={categories}
             dialogOpen={newCategoryOpen}
             setDialogOpen={SetNewCategoryOpen}
             onNewCategorySubmit={() => {}}

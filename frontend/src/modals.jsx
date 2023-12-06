@@ -148,17 +148,15 @@ export function DeleteItemDialog({index, title, dialogOpen, setDialogOpen, handl
 }
 
 
-export function NewCategoryDialog({dialogOpen, setDialogOpen, onNewCategorySubmit}) {
-  const [newCategory, setNewCategory] = React.useState("");
-  const [newUnit, setNewunit] = React.useState("");
-  const [newVerb, setNewVerb] = React.useState("");
+export function NewCategoryDialog({categories, dialogOpen, setDialogOpen, onNewCategorySubmit}) {
   
   const handleClose = () => {
     setDialogOpen(false);
   };
 
-  const onSubmit = () => {
-    onNewCategorySubmit(newCategory);
+  const onSubmit = (e) => {
+    e.preventDefault()
+    // onNewCategorySubmit();
     handleClose();
   }
   return (
@@ -172,34 +170,25 @@ export function NewCategoryDialog({dialogOpen, setDialogOpen, onNewCategorySubmi
               margin="normal"
               required
               fullWidth
-              id="name"
+              id="category"
               label="Category"
               type="text"
-              onChange={(e) => {
-                newCategory(e.target.value)
-              }}
             />
             <TextField
               margin="normal"
               required
               fullWidth
-              id="name"
+              id="unit"
               label="Unit i.e movie/show/book/game etc..."
               type="text"
-              onChange={(e) => {
-                newCategory(e.target.value)
-              }}
             />
             <TextField
               margin="normal"
               required
               fullWidth
-              id="name"
+              id="verb"
               label="Verb i.e watch/play/binge etc...."
               type="text"
-              onChange={(e) => {
-                newCategory(e.target.value)
-              }}
             />
             <Button type="submit" fullWidth variant="contained">Add Category</Button>
           </Box>
