@@ -1,18 +1,27 @@
 import * as React from 'react';
 import Button from '@mui/material/Button';
+import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import { addNewCategory } from './services'
 
 
 export function NewItemDialog({category, unit, verb, dialogOpen, setDialogOpen, onNewItemSubmit}) {
   const [newItem, setNewItem] = React.useState("");
+  const [helperText, setHelperText] = React.useState("");
+  const emptyTitleMsg = "Title cannot be empty";
   
   const handleClose = () => {setDialogOpen(false);};
   const onSubmit = () => {
+    if (newItem === "") {
+      setHelperText(emptyTitleMsg);
+      return;
+    }
+
     onNewItemSubmit(newItem);
     handleClose();
   }
@@ -32,8 +41,13 @@ export function NewItemDialog({category, unit, verb, dialogOpen, setDialogOpen, 
             type="text"
             fullWidth
             variant="standard"
-            onChange={(e) => {
-                setNewItem(e.target.value)
+            helperText={helperText}
+            error={helperText!==""}
+            onChange={(e) => {               
+              const newValue = e.target.value;
+              setNewItem(newValue);
+              const newHelperTextValue = newValue === "" ? emptyTitleMsg : "";
+              setHelperText(newHelperTextValue);
             }}
           />
         </DialogContent>
@@ -48,17 +62,28 @@ export function NewItemDialog({category, unit, verb, dialogOpen, setDialogOpen, 
 
 export function EditItemDialog({index, title, dialogOpen, setDialogOpen, handleCloseState, handleItemUpdate}) {
   const [editedTitle, setEditedTitle] = React.useState(title);
-  
+  const [helperText, setHelperText] = React.useState('');
+  const emptyTitleMsg = "Title cannot be empty";
+
+
   const handleClose = () => {
     setDialogOpen(false);
     handleCloseState();
   };
 
   const onSubmit = () => {
-    // Check for null value and changed value
-    if (editedTitle !== "" && editedTitle !==  title) {
-      handleItemUpdate(index, editedTitle);
+    // If value not changed, dont need to do anything
+    if (editedTitle !==  title) {
+
+    
+      if (editedTitle !== "") {
+        handleItemUpdate(index, editedTitle);
+      } else {
+        setHelperText(emptyTitleMsg);
+        return;
+      }
     }
+    
     handleClose();
   }
 
@@ -75,9 +100,15 @@ export function EditItemDialog({index, title, dialogOpen, setDialogOpen, handleC
             type="text"
             fullWidth
             defaultValue={editedTitle}
+            helperText={helperText}
+            error={helperText!==""}
             variant="standard"
             onChange={(e) => {
-              setEditedTitle(e.target.value)
+              const newValue = e.target.value;
+              setEditedTitle(newValue);
+              const newHelperTextValue = newValue === "" ? emptyTitleMsg : "";
+              setHelperText(newHelperTextValue);
+              
             }}
           />
         </DialogContent>
@@ -117,3 +148,68 @@ export function DeleteItemDialog({index, title, dialogOpen, setDialogOpen, handl
   );
 }
 
+
+export function NewCategoryDialog({categories, dialogOpen, setDialogOpen, userGuid, onNewCategorySubmit}) {
+  
+  const handleClose = () => {
+    setDialogOpen(false);
+  };
+
+  const onSubmit = (e) => {
+    e.preventDefault()
+
+    const data = new FormData(e.currentTarget);
+    const category = data.get('category');
+    const unit = data.get('unit');
+    const verb = data.get('verb');
+
+    addNewCategory(userGuid, category, unit, verb).then((response) => {
+      if (response !== null) {
+        onNewCategorySubmit(category, unit, verb);
+        handleClose();
+      }
+    })
+
+    
+  }
+  return (
+    <React.Fragment>
+      <Dialog open={dialogOpen} onClose={handleClose}>
+        <DialogTitle>Enter the title of the new category</DialogTitle>
+        <DialogContent>
+          <Box component="form" onSubmit={onSubmit} sx={{ mt: 1 }}>
+            <TextField
+              autoFocus
+              margin="normal"
+              required
+              fullWidth
+              id="category"
+              name="category"
+              label="Category"
+              type="text"
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="unit"
+              name="unit"
+              label="Unit e.g movie/show/book/game etc..."
+              type="text"
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="verb"
+              name="verb"
+              label="Verb e.g watch/play/binge etc...."
+              type="text"
+            />
+            <Button type="submit" fullWidth variant="contained">Add Category</Button>
+          </Box>
+        </DialogContent>
+      </Dialog>
+    </React.Fragment>
+  );
+}

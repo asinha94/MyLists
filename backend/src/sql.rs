@@ -1,5 +1,5 @@
 
-use sqlx::{Connection, PgConnection, Row};
+use sqlx::{Connection, PgConnection, Row, postgres::PgQueryResult};
 
 const USER: &str = "web";
 const PASSWORD: &str = "password";
@@ -22,6 +22,16 @@ pub struct DBItem {
     pub title: String,
     pub order_key: String
 }
+
+
+#[derive(sqlx::FromRow)]
+pub struct DBCategory {
+    pub category_title: String,
+    pub category_unit: String,
+    pub category_consume_verb: String,
+}
+
+
 #[derive(sqlx::FromRow)]
 pub struct DBCredentialUser {
     pub username: String,
@@ -67,9 +77,9 @@ pub async fn get_all_user_items(user_guid: &String) -> Vec<DBItem> {
 
     sqlx::query_as::<_, DBItem>("
         SELECT i.id, c.category_title, c.category_unit, c.category_consume_verb, i.title, i.order_key
-        FROM items i
-        JOIN categories c ON c.id = i.category_id
-        JOIN site_users u ON u.id = c.user_id
+        FROM site_users u 
+        JOIN categories c ON u.id = c.user_id
+        JOIN items i ON c.id = i.category_id
         WHERE u.user_guid = $1
         ORDER BY i.order_key")
         .bind(user_guid)
@@ -77,6 +87,23 @@ pub async fn get_all_user_items(user_guid: &String) -> Vec<DBItem> {
         .await
         .unwrap()
 }
+
+
+pub async fn get_all_user_categories(user_guid: &String) -> Vec<DBCategory> {
+    let connuri = get_postgres_connect_uri();
+    let mut conn = PgConnection::connect(&connuri).await.unwrap();
+
+    sqlx::query_as::<_, DBCategory>("
+        SELECT c.category_title, c.category_unit, c.category_consume_verb
+        FROM site_users u 
+        JOIN categories c ON u.id = c.user_id
+        WHERE u.user_guid = $1")
+        .bind(user_guid)
+        .fetch_all(&mut conn)
+        .await
+        .unwrap()
+}
+
 
 pub async fn update_item_order(id: i32, order_key: &String) {
     let connuri = get_postgres_connect_uri();
@@ -102,7 +129,7 @@ pub async fn insert_item(category: &String, title: &String, order_key: &String) 
         INSERT INTO items (category_id, title, order_key)
         SELECT id, $1, $2 FROM categories
         WHERE category_title = $3
-        ON CONFLICT (title) DO UPDATE
+        ON CONFLICT (category_id, title) DO UPDATE
         SET order_key = $4
         RETURNING id")
         .bind(title)
@@ -164,4 +191,22 @@ pub async fn insert_user(displayname: &String, username: &String, password_hash:
         .await
 }
 
+pub async fn insert_category(username: &String, category_title: &String, category_unit: &String, category_verb: &String)
+-> Result<PgQueryResult, sqlx::Error>
+ {
+    let connuri = get_postgres_connect_uri();
+    let mut conn = PgConnection::connect(&connuri).await.unwrap();
+
+    sqlx::query("
+        INSERT INTO categories (user_id, category_title, category_unit, category_consume_verb)
+        SELECT su.id, $1, $2, $3
+        FROM site_users su
+        WHERE su.username = $4")
+        .bind(category_title)
+        .bind(category_unit)
+        .bind(category_verb)
+        .bind(username)
+        .execute(&mut conn)
+        .await
+}
 

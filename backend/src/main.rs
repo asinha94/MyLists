@@ -21,20 +21,68 @@ const HOST: &str = "0.0.0.0";
 const PORT: u16 = 8000;
 
 
-#[post("/api/reorder")]
-async fn reorder_item(body: web::Json<api::ChangeDelta>) -> impl Responder {
-    let change_delta = body.0;
+#[post("/api/category")]
+async fn add_category(body: web::Json<api::UINewCategory>, state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
     
-    let first_key = &change_delta.itemBefore.order_key;
-    let second_key = &change_delta.itemAfter.order_key;
-    let new_key = utils::get_keys_midpoint(&first_key, &second_key);
+    // Get auth cookie if available
+    let cookie = match session.get::<String>("authToken") {
+        Err(e) => {
+            println!("Unexpected error when checking session storage: {e}");
+            return HttpResponse::InternalServerError()
+                .body(format!("Cookie Session failure: {e}"));
+        },
 
-    let mut updated_item = change_delta.item;
-    let id = updated_item.id.parse().unwrap();
-    sql::update_item_order(id, &new_key).await;
+        Ok(cookie) => cookie
+    };
 
-    updated_item.order_key = new_key;
-    serde_json::to_string(&updated_item).unwrap()
+    if cookie.is_none() {
+        return HttpResponse::Unauthorized().finish();
+    }
+
+    // Check session cache for cookie
+    let auth_token = cookie.unwrap();
+    let app_data = state_data.app_data.lock().unwrap();
+    
+    // Get user attached to cookie. If none, 401
+    let user = match app_data.username_by_token.get(&auth_token) {
+        None => return HttpResponse::Unauthorized().finish(),
+        Some(u) => match app_data.user_by_username.get(u) {
+            None => return HttpResponse::Unauthorized().finish(),
+            Some(x) => x
+        }
+    };
+    
+    let username = &user.username;
+    let new_category = body.0;
+    let user_guid = &new_category.user_guid;
+    let category_title = &new_category.category_title;
+    let category_unit = &new_category.category_unit;
+    let category_verb = &new_category.category_verb;
+
+    if user_guid != &user.user_guid {
+        return HttpResponse::Unauthorized().finish();
+    }
+
+    match sql::insert_category(&username, category_title, category_unit, category_verb).await {
+        Ok(_) => HttpResponse::Ok().body(
+            serde_json::to_string(&new_category).unwrap()
+        ),
+        Err(e) => {
+            println!("Got some error: {e}");
+            return HttpResponse::BadRequest().finish();
+        }
+    }
+    
+    
+}
+
+
+#[delete("/api/item")]
+async fn delete_item(body: web::Json<api::UIItem>) -> impl Responder {
+    let item = body.0;
+    let item_id = item.id.parse().unwrap();
+    sql::delete_item(item_id).await;
+    serde_json::to_string(&item).unwrap()
 }
 
 
@@ -71,48 +119,74 @@ async fn update_item_title(body: web::Json<api::UIItem>) -> impl Responder {
 }
 
 
-#[delete("/api/item")]
-async fn delete_item(body: web::Json<api::UIItem>) -> impl Responder {
-    let item = body.0;
-    let item_id = item.id.parse().unwrap();
-    sql::delete_item(item_id).await;
-    serde_json::to_string(&item).unwrap()
-}
-
-
-#[get("/api/users")]
-async fn get_all_users() -> impl Responder {
-    let users: Vec<_> = sql::get_all_users().await
-        .iter()
-        .map(|x| api::UIDisplayUser {
-            user_guid: x.user_guid.clone(),
-            display_name: x.display_name.clone()
-        }).collect();
-
-    serde_json::to_string(&users).unwrap()
-}
-
-
 #[get("/api/items")]
 async fn get_all_items(user: web::Query<api::UIGetItemUser>) -> impl Responder {
-    let items = sql::get_all_user_items(&user.user_guid).await;
-    // Create dict lists from list of dicts
-    let mut data = HashMap::new();
-    for item in items {
-        // Lookup or insert
-        let category_list = data.entry(item.category_title.clone())
-            .or_insert(api::Column {
-                id: item.category_title.clone(),
-                title: item.category_title.clone(),
-                unit: item.category_unit.clone(),
-                verb: item.category_consume_verb.clone(),
-                items: Vec::new(),
-            });
 
+    let mut data = HashMap::new();
+    let categories = sql::get_all_user_categories(&user.user_guid).await;
+    for category in categories {
+        data.insert(category.category_title.clone(), api::Column {
+            id: category.category_title.clone(),
+            title: category.category_title.clone(),
+            unit: category.category_unit.clone(),
+            verb: category.category_consume_verb.clone(),
+            items: Vec::new(),
+        });
+    };
+
+    // Insert all items
+    let items = sql::get_all_user_items(&user.user_guid).await;
+    for item in items {
+        let category_list = data.get_mut(&item.category_title).unwrap();
         category_list.items.push(api::UIItem::new(&item));
     }
     
     serde_json::to_string(&data).unwrap()
+}
+
+
+#[post("/api/login")]
+async fn login(body: web::Json<api::UILoginUser>, state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
+    let data = body.0;
+    let username = data.username;
+    let password = data.password;
+
+    if !utils::login::password_is_valid(&password) {
+        return HttpResponse::Unauthorized().finish();
+    }
+
+    let mut app_data = state_data.app_data.lock().unwrap();
+    let user = app_data.user_by_username.get(&username);
+    
+    // User Unknown. Eventually replace with Redis + DB
+    if user.is_none() {
+        return HttpResponse::Unauthorized().finish();
+    }
+
+    // Check if password matches the hash
+    let user = user.unwrap();
+    if !utils::login::password_hashes_to_phc(&password, &user.password_hash) {
+        return HttpResponse::Unauthorized().finish();
+    }
+
+    // Create object for frontend
+    let u = api::UIDisplayUser {
+        user_guid: user.user_guid.clone(),
+        display_name: user.display_name.clone()
+    };
+
+    // Generate an AuthToken Cookie for the user
+    let api_key = api::generate_api_key();
+    app_data.username_by_token.insert(api_key.clone(), username);
+
+    // Insert into Cookie Session i.e Add to Set-Cookie Header
+    match session.insert("authToken", api_key) {
+        Ok(_) => HttpResponse::Ok().body(serde_json::to_string(&u).unwrap()),
+        Err(e) => {
+            println!("Failed to set cookie: {e}");
+            HttpResponse::InternalServerError().finish()
+        }
+    }
 }
 
 
@@ -164,6 +238,38 @@ async fn register_new_user(body: web::Json<api::UIRegisterUser>, state_data: web
 }
 
 
+#[post("/api/reorder")]
+async fn reorder_item(body: web::Json<api::ChangeDelta>) -> impl Responder {
+    let change_delta = body.0;
+    
+    let first_key = &change_delta.itemBefore.order_key;
+    let second_key = &change_delta.itemAfter.order_key;
+    let new_key = utils::get_keys_midpoint(&first_key, &second_key);
+
+    let mut updated_item = change_delta.item;
+    let id = updated_item.id.parse().unwrap();
+    sql::update_item_order(id, &new_key).await;
+
+    updated_item.order_key = new_key;
+    serde_json::to_string(&updated_item).unwrap()
+}
+
+
+#[get("/api/users")]
+async fn get_all_users() -> impl Responder {
+    let users: Vec<_> = sql::get_all_users().await
+        .iter()
+        .map(|x| api::UIDisplayUser {
+            user_guid: x.user_guid.clone(),
+            display_name: x.display_name.clone()
+        }).collect();
+
+    serde_json::to_string(&users).unwrap()
+}
+
+
+
+/*
 #[post("/api/autologin")]
 async fn autologin(state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
 
@@ -200,51 +306,7 @@ async fn autologin(state_data: web::Data<app::AppState>, session: Session) -> im
 
 
 }
-
-
-#[post("/api/login")]
-async fn login(body: web::Json<api::UILoginUser>, state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
-    let data = body.0;
-    let username = data.username;
-    let password = data.password;
-
-    if !utils::login::password_is_valid(&password) {
-        return HttpResponse::Unauthorized().finish();
-    }
-
-    let mut app_data = state_data.app_data.lock().unwrap();
-    let user = app_data.user_by_username.get(&username);
-    
-    // User Unknown. Eventually replace with Redis + DB
-    if user.is_none() {
-        return HttpResponse::Unauthorized().finish();
-    }
-
-    // Check if password matches the hash
-    let user = user.unwrap();
-    if !utils::login::password_hashes_to_phc(&password, &user.password_hash) {
-        return HttpResponse::Unauthorized().finish();
-    }
-
-    // Create object for frontend
-    let u = api::UIDisplayUser {
-        user_guid: user.user_guid.clone(),
-        display_name: user.display_name.clone()
-    };
-
-    // Generate an AuthToken Cookie for the user
-    let api_key = api::generate_api_key();
-    app_data.username_by_token.insert(api_key.clone(), username);
-
-    // Insert into Cookie Session i.e Add to Set-Cookie Header
-    match session.insert("authToken", api_key) {
-        Ok(_) => HttpResponse::Ok().body(serde_json::to_string(&u).unwrap()),
-        Err(e) => {
-            println!("Failed to set cookie: {e}");
-            HttpResponse::InternalServerError().finish()
-        }
-    }
-}
+*/
 
 
 fn session_middleware(is_prod: bool, cookie_secret_key: String) -> SessionMiddleware<CookieSessionStore> {
@@ -297,6 +359,7 @@ async fn main() -> std::io::Result<()>{
     HttpServer::new(move|| {
         App::new()
         .app_data(shared_data.clone())
+        .service(add_category)
         .service(get_all_items)
         .service(get_all_users)
         .service(reorder_item)
