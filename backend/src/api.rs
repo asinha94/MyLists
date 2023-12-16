@@ -67,6 +67,15 @@ pub struct UIGetItemUser {
 }
 
 
+#[derive(Deserialize, Serialize)]
+pub struct UINewCategory {
+    pub user_guid: String,
+    pub category_title: String,
+    pub category_unit: String,
+    pub category_verb: String,
+}
+
+
 pub fn generate_api_key() -> String {
     let cookie_api_key = Key::generate();
     let cookie_api_key_bytes = cookie_api_key.master();

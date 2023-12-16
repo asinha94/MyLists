@@ -123,7 +123,7 @@ function Category({categoryData, searchValue, isDragDisabled}) {
       items: newItems
     }
 
-    // This needs to be set initially or else we get a jitter affect
+    // This needs to be done initially or else we get a jitter affect
     // as the API needs a second to process the change
     // When the response comes in, react realizes it doesnt need to re-render
     // So it doesnt feel jittery

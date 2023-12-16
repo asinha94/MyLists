@@ -243,10 +243,8 @@ export async function loginUser(username, password) {
       registerUpdateData.authUser = newUser;
       
     }
-    
-    // 401 Generic unauthorized failure message
-    else if (response.status === 401) {
-      
+  
+    else {
       // Unexpected Error
       if (response.status !== 401) {
         console.log("Recieved error while trying to register user: " + response.status + " " + response.statusText);
@@ -285,7 +283,7 @@ export async function loginUserOnStartup() {
     }
     
     // 401 Generic unauthorized failure message
-    else if (response.status === 401) {
+    else {
       // Unexpected Error
       if (response.status !== 401) {
         console.log("Recieved error while trying to register user: " + response.status + " " + response.statusText);
@@ -294,6 +292,51 @@ export async function loginUserOnStartup() {
     }
 
     return registerUpdateData;
+
+  } catch(err) {
+    console.log(err.message);
+    return null;
+  }
+}
+
+
+export async function addNewCategory(user_guid, category_title, category_unit, category_verb) {
+  
+  const body = {
+    user_guid: user_guid,
+    category_title: category_title,
+    category_unit: category_unit,
+    category_verb: category_verb
+  }
+  
+  try {
+    const response = await fetch(API_URL + '/category', {
+      method: 'POST',
+      'credentials': 'include',
+      headers: {
+        'Accept': 'appplication/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+      }
+    );
+
+    
+    if (response.ok) {
+      return await response.json();
+    }
+
+    // 401 Generic unauthorized failure message
+    if (response.status === 401) {
+
+    }
+    
+    // Unexpected Error
+    else {
+      console.log("Recieved error while trying to register user: " + response.status + " " + response.statusText);
+    }
+
+    return null;
 
   } catch(err) {
     console.log(err.message);

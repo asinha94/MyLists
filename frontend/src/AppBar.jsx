@@ -159,7 +159,7 @@ function UserSideDrawerItem({user, setSelectedUser, handleDrawerClose}) {
 }
 
   
-export default function SearchAppBar({users, categories, selectedCategory, setSelectedCategory, setSearchValue, selectedUser, setSelectedUser, handleNewUserRegister, handleUserLogin, loggedInUser}) {
+export default function SearchAppBar({users, categories, selectedCategory, setSelectedCategory, setSearchValue, selectedUser, setSelectedUser, handleNewUserRegister, handleUserLogin, loggedInUser, handleAddNewCategory}) {
   const [open, setOpen] = useState(false);
   const [newCategoryOpen, SetNewCategoryOpen] = useState(false);
 
@@ -204,7 +204,8 @@ export default function SearchAppBar({users, categories, selectedCategory, setSe
             categories={categories}
             dialogOpen={newCategoryOpen}
             setDialogOpen={SetNewCategoryOpen}
-            onNewCategorySubmit={() => {}}
+            userGuid={selectedUser.user_guid}
+            onNewCategorySubmit={handleAddNewCategory}
           />
           
           <Typography

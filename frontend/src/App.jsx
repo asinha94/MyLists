@@ -60,6 +60,21 @@ export default function App() {
     setSelectedUser(user);
   }
 
+  const handleAddNewCategory = (newCategory, newCategoryUnit, newCategoryVerb) => {
+    const newLoadedData = {
+      ...loadedData,
+      [newCategory]: {
+        title: newCategory,
+      items: [],
+      unit: newCategoryUnit,
+      verb:newCategoryVerb
+      }
+    };
+
+    setLoadedData(newLoadedData);
+    setSelectedCategory(newCategory);
+  };
+
   // Get List of users for drawer. Set first user as selected user
   useEffect(() => {
     getAllUsers().then(userInfo => {
@@ -101,6 +116,7 @@ export default function App() {
         handleNewUserRegister={handleNewUserRegister}
         handleUserLogin={handleUserLogin}
         loggedInUser={loggedInUser}
+        handleAddNewCategory={handleAddNewCategory}
         />
       <Categories
         loadedData={loadedData}

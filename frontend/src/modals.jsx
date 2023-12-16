@@ -7,6 +7,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import { addNewCategory } from './services'
 
 
 export function NewItemDialog({category, unit, verb, dialogOpen, setDialogOpen, onNewItemSubmit}) {
@@ -148,7 +149,7 @@ export function DeleteItemDialog({index, title, dialogOpen, setDialogOpen, handl
 }
 
 
-export function NewCategoryDialog({categories, dialogOpen, setDialogOpen, onNewCategorySubmit}) {
+export function NewCategoryDialog({categories, dialogOpen, setDialogOpen, userGuid, onNewCategorySubmit}) {
   
   const handleClose = () => {
     setDialogOpen(false);
@@ -156,8 +157,20 @@ export function NewCategoryDialog({categories, dialogOpen, setDialogOpen, onNewC
 
   const onSubmit = (e) => {
     e.preventDefault()
-    // onNewCategorySubmit();
-    handleClose();
+
+    const data = new FormData(e.currentTarget);
+    const category = data.get('category');
+    const unit = data.get('unit');
+    const verb = data.get('verb');
+
+    addNewCategory(userGuid, category, unit, verb).then((response) => {
+      if (response !== null) {
+        onNewCategorySubmit(category, unit, verb);
+        handleClose();
+      }
+    })
+
+    
   }
   return (
     <React.Fragment>
@@ -171,6 +184,7 @@ export function NewCategoryDialog({categories, dialogOpen, setDialogOpen, onNewC
               required
               fullWidth
               id="category"
+              name="category"
               label="Category"
               type="text"
             />
@@ -179,7 +193,8 @@ export function NewCategoryDialog({categories, dialogOpen, setDialogOpen, onNewC
               required
               fullWidth
               id="unit"
-              label="Unit i.e movie/show/book/game etc..."
+              name="unit"
+              label="Unit e.g movie/show/book/game etc..."
               type="text"
             />
             <TextField
@@ -187,7 +202,8 @@ export function NewCategoryDialog({categories, dialogOpen, setDialogOpen, onNewC
               required
               fullWidth
               id="verb"
-              label="Verb i.e watch/play/binge etc...."
+              name="verb"
+              label="Verb e.g watch/play/binge etc...."
               type="text"
             />
             <Button type="submit" fullWidth variant="contained">Add Category</Button>
