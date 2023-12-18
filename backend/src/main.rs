@@ -25,22 +25,20 @@ const PORT: u16 = 8000;
 async fn autologin(state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
 
     // Get cookie if available
-    let cookie = match session.get::<String>("authToken") {
+    let auth_token = match session.get::<String>("authToken") {
         Err(e) => {
             println!("Unexpected error when checking session storage: {e}");
             return HttpResponse::InternalServerError()
                 .body(format!("Cookie Session failure: {e}"));
         },
 
-        Ok(cookie) => cookie
+        Ok(cookie) => match cookie {
+            None => return HttpResponse::Unauthorized().finish(),
+            Some(auth_token) => auth_token
+        }
     };
 
-    if cookie.is_none() {
-        return HttpResponse::Unauthorized().finish();
-    }
-
     // Check session cache for cookie
-    let auth_token = cookie.unwrap();
     let app_data = state_data.app_data.lock().unwrap();
     let username = app_data.username_by_token.get(&auth_token);
 
@@ -308,6 +306,24 @@ async fn reorder_item(user_query: web::Query<api::UIUser>, body: web::Json<api::
 }
 
 
+#[put("/api/signout")]
+async fn sign_out_user(state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
+
+    let auth_token = match session.get::<String>("authToken").unwrap() {
+        None => return HttpResponse::Unauthorized(),
+        Some(a) => a
+    };
+
+    // Remove the user from our cache
+    let mut app_data = state_data.app_data.lock().unwrap();
+    app_data.username_by_token.remove(&auth_token);
+
+    // delete cookie
+    session.remove("authToken");
+    HttpResponse::Ok()
+}
+
+
 #[get("/api/users")]
 async fn get_all_users() -> impl Responder {
     let users: Vec<_> = sql::get_all_users().await
@@ -371,16 +387,17 @@ async fn main() -> std::io::Result<()>{
     HttpServer::new(move|| {
         App::new()
         .app_data(shared_data.clone())
-        .service(autologin)
         .service(add_category)
+        .service(autologin)
+        .service(delete_item)
         .service(get_all_items)
         .service(get_all_users)
-        .service(reorder_item)
         .service(insert_item)
-        .service(update_item_title)
-        .service(delete_item)
-        .service(register_new_user)
         .service(login)
+        .service(register_new_user)
+        .service(reorder_item)
+        .service(sign_out_user)
+        .service(update_item_title)
         .wrap(Cors::permissive())
         .wrap(Logger::default())
         .wrap(session_middleware(is_prod, cookie_secret_key.clone()))

@@ -269,6 +269,23 @@ export async function loginUser(username, password) {
 }
 
 
+export async function signOutUser() {
+  try {
+    const response = await fetch(API_URL + '/signout', {
+      method: 'PUT',
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      console.log("Failed to sign out user: " + response.status + " " + response.statusText);
+    }
+
+  } catch(err) {
+    console.log(err.message);
+  }
+}
+
+
 export async function loginUserOnStartup() {
   try {
     const response = await fetch(API_URL + '/autologin', {
