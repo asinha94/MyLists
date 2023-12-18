@@ -31,8 +31,10 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [searchValue, setSearchValue] = useState('');
 
-  const isDragDisabled = searchValue.length !== 0;
+  const authorized = loggedInUser !== null && loggedInUser.user_guid === selectedUser.user_guid;
+  const isDragDisabled = searchValue.length !== 0 || !authorized;
   const categories = Object.keys(loadedData).sort();
+  
   
   // Update the initially selected category
   if (isMobile && selectedCategory === "" && categories.length > 0) {
@@ -129,6 +131,7 @@ export default function App() {
         handleUserLogin={handleUserLogin}
         loggedInUser={loggedInUser}
         handleAddNewCategory={handleAddNewCategory}
+        authorized={authorized}
         />
       <Categories
         loadedData={loadedData}
@@ -136,6 +139,7 @@ export default function App() {
         searchValue={searchValue}
         isDragDisabled={isDragDisabled}
         selectedCategory={selectedCategory}
+        authorized={authorized}
       />
     </ThemeProvider> 
   )

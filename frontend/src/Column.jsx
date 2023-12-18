@@ -20,7 +20,7 @@ const itemListStyle = {
   "minHeight": "100px"
 }
 
-function TitleBar({title, unit, verb, onNewItemSubmit}) {
+function TitleBar({title, unit, verb, onNewItemSubmit, authorized}) {
   const [dialogOpen, setDialogOpen] = React.useState(false);
 
   const titleSyle = {
@@ -43,9 +43,11 @@ function TitleBar({title, unit, verb, onNewItemSubmit}) {
   return (
     <div style={divStyle}>
       <h3 style={titleSyle}>{title}</h3>
-      <IconButton aria-label="Example" onClick={plusOnClick}>
-        <AddIcon />
-      </IconButton>
+      {authorized && 
+        <IconButton aria-label="Example" onClick={plusOnClick}>
+          <AddIcon />
+        </IconButton>
+      }
       <NewItemDialog
         category={title}
         unit={unit}
@@ -59,7 +61,7 @@ function TitleBar({title, unit, verb, onNewItemSubmit}) {
 }
 
 
-function Category({categoryData, searchValue, isDragDisabled}) {
+function Category({categoryData, searchValue, isDragDisabled, authorized}) {
   const [data, setData] = useState(categoryData);
 
   const title = data.title;
@@ -102,7 +104,7 @@ function Category({categoryData, searchValue, isDragDisabled}) {
     }
   };
 
-  const onDragEnd = result => {
+  const onDragEnd = (result) => {
     const {destination, source} = result;
     // Dropped from list
     if (!destination) {
@@ -219,6 +221,7 @@ function Category({categoryData, searchValue, isDragDisabled}) {
           unit={unit}
           verb={verb}
           onNewItemSubmit={onNewItemSubmit}
+          authorized={authorized}
         />
         <Droppable droppableId={data.id} type={title}>
           {(provided, snaphshot) => {
@@ -242,6 +245,7 @@ function Category({categoryData, searchValue, isDragDisabled}) {
                     isDragDisabled={isDragDisabled}
                     OnItemEditSet={OnItemEditSet}
                     OnItemDeleteConfirm={OnItemDeleteConfirm}
+                    authorized={authorized}
                   />)}
                 {provided.placeholder}
               </div>
@@ -254,7 +258,7 @@ function Category({categoryData, searchValue, isDragDisabled}) {
 }
 
 
-export default function Categories({loadedData, categories, searchValue, isDragDisabled, selectedCategory}) {
+export default function Categories({loadedData, categories, searchValue, isDragDisabled, selectedCategory, authorized}) {
   if (isMobile) {
     if (selectedCategory) {
       const categoryData = loadedData[selectedCategory];
@@ -264,6 +268,7 @@ export default function Categories({loadedData, categories, searchValue, isDragD
           categoryData={categoryData}
           isDragDisabled={isDragDisabled}
           searchValue={searchValue}
+          authorized={authorized}
         />
       )
     }
@@ -281,6 +286,7 @@ export default function Categories({loadedData, categories, searchValue, isDragD
               categoryData={categoryData}
               isDragDisabled={isDragDisabled}
               searchValue={searchValue}
+              authorized={authorized}
             />
           )
           
