@@ -280,12 +280,12 @@ export async function loginUserOnStartup() {
 
     // Logged out
     else if (response.status === 412) {
-      const output = await response.json();
+      const output = await response.body;
       console.log(response.status + " " + response.statusText + ": Recieved error while trying to register user. " + output);
     }
 
     else if (response.status === 401) {
-      console.log("Unauthorized login");
+      // Expected
     }
     
     // Unexpected Error

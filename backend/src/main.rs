@@ -63,46 +63,18 @@ async fn autologin(state_data: web::Data<app::AppState>, session: Session) -> im
 
 
 #[post("/api/category")]
-async fn add_category(body: web::Json<api::UINewCategory>, state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
+async fn add_category(user_query: web::Query<api::UIUser>, body: web::Json<api::UINewCategory>, state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
     
-    // Get auth cookie if available
-    let cookie = match session.get::<String>("authToken") {
-        Err(e) => {
-            println!("Unexpected error when checking session storage: {e}");
-            return HttpResponse::InternalServerError()
-                .body(format!("Cookie Session failure: {e}"));
-        },
-
-        Ok(cookie) => cookie
-    };
-
-    if cookie.is_none() {
-        return HttpResponse::Unauthorized().finish();
-    }
-
-    // Check session cache for cookie
-    let auth_token = cookie.unwrap();
-    let app_data = state_data.app_data.lock().unwrap();
-    
-    // Get user attached to cookie. If none, 401
-    let user = match app_data.username_by_token.get(&auth_token) {
+    // We get back the username of the user that is authenticated based on the cookie, None otherwise
+    let username = match app::is_authenticated_and_getusername(&session, &state_data, &user_query.user_guid) {
         None => return HttpResponse::Unauthorized().finish(),
-        Some(u) => match app_data.user_by_username.get(u) {
-            None => return HttpResponse::Unauthorized().finish(),
-            Some(x) => x
-        }
+        Some(u) => u
     };
-    
-    let username = &user.username;
-    let new_category = body.0;
-    let user_guid = &new_category.user_guid;
-    let category_title = &new_category.category_title;
-    let category_unit = &new_category.category_unit;
-    let category_verb = &new_category.category_verb;
 
-    if user_guid != &user.user_guid {
-        return HttpResponse::Unauthorized().finish();
-    }
+   let new_category = body.0;
+   let category_title = &new_category.category_title;
+   let category_unit = &new_category.category_unit;
+   let category_verb = &new_category.category_verb;
 
     match sql::insert_category(&username, category_title, category_unit, category_verb).await {
         Ok(_) => HttpResponse::Ok().body(
@@ -113,22 +85,37 @@ async fn add_category(body: web::Json<api::UINewCategory>, state_data: web::Data
             return HttpResponse::BadRequest().finish();
         }
     }
-    
-    
 }
 
 
 #[delete("/api/item")]
-async fn delete_item(body: web::Json<api::UIItem>) -> impl Responder {
+async fn delete_item(user_query: web::Query<api::UIUser>, body: web::Json<api::UIItem>, state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
+    // We get back the username of the user that is authenticated based on the cookie, None otherwise
+    let username = match app::is_authenticated_and_getusername(&session, &state_data, &user_query.user_guid) {
+        None => return HttpResponse::Unauthorized().finish(),
+        Some(u) => u
+    };
+    
     let item = body.0;
     let item_id = item.id.parse().unwrap();
     sql::delete_item(item_id).await;
-    serde_json::to_string(&item).unwrap()
+    HttpResponse::Ok().body(
+        serde_json::to_string(&item).unwrap()
+    )
+    
 }
 
 
 #[post("/api/item")]
-async fn insert_item(body: web::Json<api::ChangeDelta>) -> impl Responder {
+async fn insert_item(user_query: web::Query<api::UIUser>, body: web::Json<api::ChangeDelta>, state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
+    
+    // We get back the username of the user that is authenticated based on the cookie, None otherwise
+    let username = match app::is_authenticated_and_getusername(&session, &state_data, &user_query.user_guid) {
+        None => return HttpResponse::Unauthorized().finish(),
+        Some(u) => u
+    };
+    // TODO: use username in query
+
     let change_delta = body.0;
     
     // Generate the new key
@@ -147,24 +134,37 @@ async fn insert_item(body: web::Json<api::ChangeDelta>) -> impl Responder {
         order_key: new_key
     };
 
-    serde_json::to_string(&new_item).unwrap()
+    HttpResponse::Ok().body(
+        serde_json::to_string(&new_item).unwrap()
+    )
 }
 
 
 #[put("/api/item")]
-async fn update_item_title(body: web::Json<api::UIItem>) -> impl Responder {
+async fn update_item_title(user_query: web::Query<api::UIUser>, body: web::Json<api::UIItem>, state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
+    // We get back the username of the user that is authenticated based on the cookie, None otherwise
+    let username = match app::is_authenticated_and_getusername(&session, &state_data, &user_query.user_guid) {
+        None => return HttpResponse::Unauthorized().finish(),
+        Some(u) => u
+    };
+    // TODO: use username in query
+    
     let item = body.0;
     let item_id = item.id.parse().unwrap();
     sql::update_item_title(item_id, &item.content).await;
-    serde_json::to_string(&item).unwrap()
+
+    HttpResponse::Ok().body(
+        serde_json::to_string(&item).unwrap()
+    )
+    
 }
 
 
 #[get("/api/items")]
-async fn get_all_items(user: web::Query<api::UIGetItemUser>) -> impl Responder {
+async fn get_all_items(user_query: web::Query<api::UIUser>) -> impl Responder {
 
     let mut data = HashMap::new();
-    let categories = sql::get_all_user_categories(&user.user_guid).await;
+    let categories = sql::get_all_user_categories(&user_query.user_guid).await;
     for category in categories {
         data.insert(category.category_title.clone(), api::Column {
             id: category.category_title.clone(),
@@ -176,7 +176,7 @@ async fn get_all_items(user: web::Query<api::UIGetItemUser>) -> impl Responder {
     };
 
     // Insert all items
-    let items = sql::get_all_user_items(&user.user_guid).await;
+    let items = sql::get_all_user_items(&user_query.user_guid).await;
     for item in items {
         let category_list = data.get_mut(&item.category_title).unwrap();
         category_list.items.push(api::UIItem::new(&item));
@@ -272,15 +272,24 @@ async fn register_new_user(body: web::Json<api::UIRegisterUser>, state_data: web
                 display_name: displayname,
                 user_guid: user.user_guid
             };
-            HttpResponse::Ok()
-                .body(serde_json::to_string(&ui_new_user).unwrap())
+            HttpResponse::Ok().body(
+                serde_json::to_string(&ui_new_user).unwrap()
+            )
         }
     }
 }
 
 
 #[post("/api/reorder")]
-async fn reorder_item(body: web::Json<api::ChangeDelta>) -> impl Responder {
+async fn reorder_item(user_query: web::Query<api::UIUser>, body: web::Json<api::ChangeDelta>, state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
+    
+    // We get back the username of the user that is authenticated based on the cookie, None otherwise
+    let username = match app::is_authenticated_and_getusername(&session, &state_data, &user_query.user_guid) {
+        None => return HttpResponse::Unauthorized().finish(),
+        Some(u) => u
+    };
+    // TODO: use username in query
+    
     let change_delta = body.0;
     
     let first_key = &change_delta.itemBefore.order_key;
@@ -292,7 +301,10 @@ async fn reorder_item(body: web::Json<api::ChangeDelta>) -> impl Responder {
     sql::update_item_order(id, &new_key).await;
 
     updated_item.order_key = new_key;
-    serde_json::to_string(&updated_item).unwrap()
+    HttpResponse::Ok().body(
+        serde_json::to_string(&updated_item).unwrap()
+    )
+    
 }
 
 
