@@ -40,7 +40,7 @@ pub struct AppState {
 pub fn is_authenticated_and_getusername(session: &Session, state_data: &AppState, user_guid: &String) -> Option<String> {
     // Get auth cookie if available
     let auth_token = match session.get::<String>("authToken") {
-        Err(e) => return None,
+        Err(_) => return None,
         Ok(cookie) => match cookie {
             None => return None,
             Some(auth_token) => auth_token

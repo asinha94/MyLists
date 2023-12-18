@@ -237,6 +237,7 @@ function SignUp({tabIndex, index, handleLoginPostRegister, handleNewUserRegister
           label="Password"
           type="password"
           id="signup-password"
+          autoComplete='new-password'
           inputProps={{ minLength: MIN_PASSWORD_LENGTH }}
           onChange={handlePasswordChange}
           helperText={passwordHelperText}
@@ -250,6 +251,7 @@ function SignUp({tabIndex, index, handleLoginPostRegister, handleNewUserRegister
           label="Confirm Password"
           type="password"
           id="confirm-password"
+          autoComplete='new-password'
           helperText={confirmPasswordHelperText}
           error={confirmPasswordHelperText!==""}
           onChange={handleComfirmPasswordChange}

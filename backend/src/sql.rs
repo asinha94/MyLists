@@ -1,5 +1,5 @@
 
-use sqlx::{Connection, PgConnection, Row, postgres::PgQueryResult};
+use sqlx::{Connection, PgConnection, postgres::PgQueryResult, postgres::PgRow};
 
 const USER: &str = "web";
 const PASSWORD: &str = "password";
@@ -105,72 +105,91 @@ pub async fn get_all_user_categories(user_guid: &String) -> Vec<DBCategory> {
 }
 
 
-pub async fn update_item_order(id: i32, order_key: &String) {
+pub async fn update_item_order(username: &String, id: i32, order_key: &String)
+-> Result<PgQueryResult, sqlx::Error> {
     let connuri = get_postgres_connect_uri();
     let mut conn = PgConnection::connect(&connuri).await.unwrap();
 
     sqlx::query("
-        UPDATE items
+        UPDATE items i
         SET order_key = $1
-        WHERE id = $2")
+        FROM categories c, site_users s
+        WHERE i.id = $2
+        AND c.id = i.category_id
+        AND s.id = c.user_id
+        AND s.username = $3")
         .bind(order_key)
         .bind(id)
+        .bind(username)
         .execute(&mut conn)
         .await
-        .unwrap();
 }
 
 
-pub async fn insert_item(category: &String, title: &String, order_key: &String) -> i32 {
+pub async fn insert_item(username: &String, category: &String, title: &String, order_key: &String)
+ -> Result<PgRow, sqlx::Error> {
     let connuri = get_postgres_connect_uri();
     let mut conn = PgConnection::connect(&connuri).await.unwrap();
 
-    let row = sqlx::query("
+    sqlx::query("
         INSERT INTO items (category_id, title, order_key)
-        SELECT id, $1, $2 FROM categories
-        WHERE category_title = $3
+        SELECT c.id, $1, $2 FROM categories c
+        JOIN site_users s on s.id = c.user_id
+        WHERE c.category_title = $3
+        AND s.username = $4
         ON CONFLICT (category_id, title) DO UPDATE
-        SET order_key = $4
+        SET order_key = $2
         RETURNING id")
         .bind(title)
         .bind(order_key)
         .bind(category)
-        .bind(order_key)
+        .bind(username)
         .fetch_one(&mut conn)
         .await
-        .unwrap();
 
-        row.get::<i32, _>("id")
+        //row.get::<i32, _>("id")
 }
 
 
-pub async fn update_item_title(id: i32, title: &String) {
+pub async fn update_item_title(username: &String, id: i32, title: &String)
+-> Result<PgQueryResult, sqlx::Error> {
     let connuri = get_postgres_connect_uri();
     let mut conn = PgConnection::connect(&connuri).await.unwrap();
 
     sqlx::query("
-        UPDATE items
+        UPDATE items i
         SET title = $1
-        WHERE id = $2")
+        FROM categories c, site_users s
+        WHERE i.id = $2
+        AND c.id = i.category_id
+        AND s.id = c.user_id
+        AND s.username = $3")
         .bind(title)
         .bind(id)
+        .bind(username)
         .execute(&mut conn)
         .await
-        .unwrap();
 }
 
 
-pub async fn delete_item(id: i32) {
+pub async fn delete_item(username: &String, id: i32)
+-> Result<PgQueryResult, sqlx::Error> {
     let connuri = get_postgres_connect_uri();
     let mut conn = PgConnection::connect(&connuri).await.unwrap();
 
     sqlx::query("
-        DELETE FROM items
-        WHERE id = $1")
+        DELETE FROM items i
+        USING categories c, site_users s
+        WHERE i.id = $1
+        AND c.id = i.category_id
+        AND s.id = c.user_id
+        AND s.username = $2
+        
+        ")
         .bind(id)
+        .bind(username)
         .execute(&mut conn)
         .await
-        .unwrap();
 }
 
 
