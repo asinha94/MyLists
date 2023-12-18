@@ -32,7 +32,7 @@ export default function App() {
   const [searchValue, setSearchValue] = useState('');
 
   const isDragDisabled = searchValue.length !== 0;
-  const categories = Object.keys(loadedData).sort().map(column => column);
+  const categories = Object.keys(loadedData).sort();
   
   // Update the initially selected category
   if (isMobile && selectedCategory === "" && categories.length > 0) {
@@ -92,6 +92,7 @@ export default function App() {
   
   // GET the full list from the API for a particular user
   useEffect(() => {
+    setSelectedCategory("");
     setLoadedData({});
     if (selectedUser.user_guid !== "0") {
       const userGuid = selectedUser.user_guid;
