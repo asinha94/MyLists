@@ -151,17 +151,26 @@ export function DeleteItemDialog({index, title, dialogOpen, setDialogOpen, handl
 
 export function NewCategoryDialog({categories, dialogOpen, setDialogOpen, userGuid, onNewCategorySubmit}) {
   
+  const [helperText, setHelperText] = React.useState('');
+
+  const helperTextError = " category already exists!";
+  const categoriesKeys = categories.reduce((a,v) => ({...a, [v.toLowerCase()]: v}), {});
+
   const handleClose = () => {
     setDialogOpen(false);
   };
 
   const onSubmit = (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
     const data = new FormData(e.currentTarget);
     const category = data.get('category');
     const unit = data.get('unit');
     const verb = data.get('verb');
+
+    if (category.toLowerCase() in categories) {
+      return;
+    }
 
     addNewCategory(userGuid, category, unit, verb).then((response) => {
       if (response !== null) {
@@ -187,6 +196,14 @@ export function NewCategoryDialog({categories, dialogOpen, setDialogOpen, userGu
               name="category"
               label="Category"
               type="text"
+              onChange={(e) => {
+                const newCategory = e.target.value;
+                const newCategoryLowercase = newCategory.toLowerCase();
+                const newHelperText = newCategoryLowercase in categoriesKeys ? categoriesKeys[newCategoryLowercase] + helperTextError: "";
+                setHelperText(newHelperText);
+              }}
+              helperText={helperText}
+              error={helperText!==""}
             />
             <TextField
               margin="normal"

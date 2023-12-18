@@ -64,10 +64,11 @@ export default function App() {
     const newLoadedData = {
       ...loadedData,
       [newCategory]: {
+        id: newCategory,
         title: newCategory,
-      items: [],
-      unit: newCategoryUnit,
-      verb:newCategoryVerb
+        items: [],
+        unit: newCategoryUnit,
+        verb:newCategoryVerb
       }
     };
 
