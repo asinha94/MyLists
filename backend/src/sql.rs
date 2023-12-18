@@ -163,7 +163,7 @@ pub async fn update_item_title(username: &String, id: i32, title: &String)
         WHERE i.id = $2
         AND c.id = i.category_id
         AND s.id = c.user_id
-        AND s.username = $2")
+        AND s.username = $3")
         .bind(title)
         .bind(id)
         .bind(username)
