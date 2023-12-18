@@ -158,8 +158,31 @@ function UserSideDrawerItem({user, setSelectedUser, handleDrawerClose}) {
   );
 }
 
-  
-export default function SearchAppBar({users, categories, selectedCategory, setSelectedCategory, setSearchValue, selectedUser, setSelectedUser, handleNewUserRegister, handleUserLogin, loggedInUser, handleAddNewCategory, authorized}) {
+
+function UserSignedInDrawerItems({user, setSelectedUser, handleDrawerClose, handleUserSignOut}) {
+  const userGuid = user.user_guid;
+
+  return (
+    <div>
+      <UserSideDrawerItem
+        key={user.user_guid}
+        user={user}
+        setSelectedUser={setSelectedUser}
+        handleDrawerClose={handleDrawerClose}
+      />
+      <ListItem key={userGuid + "SignOut"} disablePadding>
+        <ListItemButton onClick={handleUserSignOut}>
+          <ListItemIcon>
+            <AccountCircleIcon/>
+          </ListItemIcon>
+          <ListItemText primary="Sign Out" />
+        </ListItemButton>
+      </ListItem>
+    </div>
+  );
+}
+
+export default function SearchAppBar({users, categories, selectedCategory, setSelectedCategory, setSearchValue, selectedUser, setSelectedUser, handleNewUserRegister, handleUserLogin, loggedInUser, handleAddNewCategory, authorized, handleUserSignOut}) {
   const [open, setOpen] = useState(false);
   const [newCategoryOpen, SetNewCategoryOpen] = useState(false);
 
@@ -253,11 +276,12 @@ export default function SearchAppBar({users, categories, selectedCategory, setSe
         </DrawerHeader>
         <Divider/>
         {loggedInUser ? (
-          <UserSideDrawerItem
+          <UserSignedInDrawerItems
             key={loggedInUser.user_guid}
             user={loggedInUser}
             setSelectedUser={setSelectedUser}
             handleDrawerClose={handleDrawerClose}
+            handleUserSignOut={handleUserSignOut}
           />
         ) : (
           <LoginSideDrawerItem

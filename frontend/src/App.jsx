@@ -7,7 +7,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import {isMobile} from 'react-device-detect';
 // The App
 import Categories from './Column'
-import { getUserItemData, getAllUsers, loginUserOnStartup } from './services';
+import { getUserItemData, getAllUsers, loginUserOnStartup, signOutUser } from './services';
 import SearchAppBar from './AppBar';
 
 
@@ -58,10 +58,15 @@ export default function App() {
   };
 
   const handleUserLogin = (user) => {
-    console.log("Logged in as '" + user.display_name + "'");
     setLoggedInUser(user);
     setSelectedUser(user);
-  }
+  };
+
+  const handleUserSignOut = () => {
+    signOutUser().then(() => {
+      setLoggedInUser(null);
+    })
+  };
 
   const handleAddNewCategory = (newCategory, newCategoryUnit, newCategoryVerb) => {
     const newLoadedData = {
@@ -130,6 +135,7 @@ export default function App() {
         loggedInUser={loggedInUser}
         handleAddNewCategory={handleAddNewCategory}
         authorized={authorized}
+        handleUserSignOut={handleUserSignOut}
         />
       <Categories
         loadedData={loadedData}
