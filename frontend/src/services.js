@@ -50,12 +50,13 @@ export async function sendReorderedItem(changeDelta, user_guid) {
   try {
     const response = await fetch(
       API_URL + '/reorder?' + new URLSearchParams({user_guid: user_guid}), {
-      method: 'POST',
-      headers: {
-        'Accept': 'appplication/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(changeDelta)
+        credentials: 'include',
+        method: 'POST',
+        headers: {
+          'Accept': 'appplication/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(changeDelta)
       }
     );
 

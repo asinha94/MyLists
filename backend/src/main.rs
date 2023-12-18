@@ -16,6 +16,7 @@ use actix_session::storage::CookieSessionStore;
 use actix_web::cookie::Key;
 use base64::{Engine as _, engine::general_purpose};
 use serde_json;
+use sqlx::Row;
 
 const HOST: &str = "0.0.0.0";
 const PORT: u16 = 8000;
@@ -26,11 +27,8 @@ async fn autologin(state_data: web::Data<app::AppState>, session: Session) -> im
 
     // Get cookie if available
     let auth_token = match session.get::<String>("authToken") {
-        Err(e) => {
-            println!("Unexpected error when checking session storage: {e}");
-            return HttpResponse::InternalServerError()
-                .body(format!("Cookie Session failure: {e}"));
-        },
+        Err(e) => return HttpResponse::InternalServerError()
+                .body(format!("Cookie Session failure: {e}")),
 
         Ok(cookie) => match cookie {
             None => return HttpResponse::Unauthorized().finish(),
@@ -44,7 +42,10 @@ async fn autologin(state_data: web::Data<app::AppState>, session: Session) -> im
 
     match username {
         // User has an authentication token somehow, but we don't know about it (might have expired)
-        None => return HttpResponse::PreconditionFailed().body(format!("Logged out of previous session!")),
+        None => {
+            session.remove("authToken");
+            return HttpResponse::PreconditionFailed().body(format!("Logged out of previous session!"));
+        },
         Some(u) => match app_data.user_by_username.get(u) {
             None => return HttpResponse::Unauthorized().finish(),
             Some(uc) => {
@@ -78,10 +79,8 @@ async fn add_category(user_query: web::Query<api::UIUser>, body: web::Json<api::
         Ok(_) => HttpResponse::Ok().body(
             serde_json::to_string(&new_category).unwrap()
         ),
-        Err(e) => {
-            println!("Got some error: {e}");
-            return HttpResponse::BadRequest().finish();
-        }
+        Err(_) => return HttpResponse::BadRequest().finish()
+        
     }
 }
 
@@ -96,10 +95,17 @@ async fn delete_item(user_query: web::Query<api::UIUser>, body: web::Json<api::U
     
     let item = body.0;
     let item_id = item.id.parse().unwrap();
-    sql::delete_item(item_id).await;
-    HttpResponse::Ok().body(
-        serde_json::to_string(&item).unwrap()
-    )
+    match sql::delete_item(&username, item_id).await {
+        Ok(o) => {
+            match o.rows_affected() {
+                1 => HttpResponse::Ok().body(serde_json::to_string(&item).unwrap()),
+                _ => HttpResponse::BadRequest().finish()
+            }
+        },
+        Err(_) => {
+            HttpResponse::InternalServerError().finish()
+        }
+    }
     
 }
 
@@ -124,7 +130,13 @@ async fn insert_item(user_query: web::Query<api::UIUser>, body: web::Json<api::C
     // Insert the new time
     let category = &change_delta.category;
     let title = &change_delta.item.content;
-    let new_id = sql::insert_item(category, title, &new_key).await;
+    let new_id = match sql::insert_item(&username, category, title, &new_key).await {
+        Ok(row) => match row.try_get::<i32, _>("id") {
+            Ok(id) => id,
+            Err(_) => return HttpResponse::InternalServerError().finish()
+        },
+        Err(_) => return HttpResponse::InternalServerError().finish()
+    };
 
     let new_item = api::UIItem {
         id: new_id.to_string(),
@@ -149,12 +161,13 @@ async fn update_item_title(user_query: web::Query<api::UIUser>, body: web::Json<
     
     let item = body.0;
     let item_id = item.id.parse().unwrap();
-    sql::update_item_title(item_id, &item.content).await;
-
-    HttpResponse::Ok().body(
-        serde_json::to_string(&item).unwrap()
-    )
-    
+    match sql::update_item_title(&username, item_id, &item.content).await {
+        Ok(o) => match o.rows_affected() {
+            1 => HttpResponse::Ok().body(serde_json::to_string(&item).unwrap()),
+            _ => return HttpResponse::BadRequest().finish(),
+        },
+        Err(_) => return HttpResponse::InternalServerError().finish(),
+    }
 }
 
 
@@ -221,10 +234,7 @@ async fn login(body: web::Json<api::UILoginUser>, state_data: web::Data<app::App
     // Insert into Cookie Session i.e Add to Set-Cookie Header
     match session.insert("authToken", api_key) {
         Ok(_) => HttpResponse::Ok().body(serde_json::to_string(&u).unwrap()),
-        Err(e) => {
-            println!("Failed to set cookie: {e}");
-            HttpResponse::InternalServerError().finish()
-        }
+        Err(_) => HttpResponse::InternalServerError().finish()
     }
 }
 
@@ -254,11 +264,7 @@ async fn register_new_user(body: web::Json<api::UIRegisterUser>, state_data: web
     
     // Check for conflict
     match e {
-        Err(e) => {
-            // Possible there are other errors. We should handle this better in general
-            println!("{:?}", e);
-            HttpResponse::Conflict().finish()
-        },
+        Err(_) => HttpResponse::Conflict().finish(),
         Ok(user) => {
             // Insert the user into our cache, then force the user to re-login
             // To get their cookie. Send them their name/guid to update their frontend
@@ -296,7 +302,13 @@ async fn reorder_item(user_query: web::Query<api::UIUser>, body: web::Json<api::
 
     let mut updated_item = change_delta.item;
     let id = updated_item.id.parse().unwrap();
-    sql::update_item_order(id, &new_key).await;
+    match sql::update_item_order(&username, id, &new_key).await {
+        Ok(o) => match o.rows_affected() {
+            1 => (),
+            _ => return HttpResponse::BadRequest().finish()
+        }
+        Err(_) => return HttpResponse::InternalServerError().finish()
+    };
 
     updated_item.order_key = new_key;
     HttpResponse::Ok().body(

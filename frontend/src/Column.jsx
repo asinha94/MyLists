@@ -146,7 +146,7 @@ function Category({categoryData, searchValue, isDragDisabled, authorized, select
       newItems[destination.index] = newItem;
       setData(newData);
     });
-  }
+  };
 
   const onNewItemSubmit = (newtitle) => {
     const newItem = {
@@ -191,7 +191,7 @@ function Category({categoryData, searchValue, isDragDisabled, authorized, select
       }
     })
 
-  }
+  };
 
   const OnItemDeleteConfirm = (index) => {
     
