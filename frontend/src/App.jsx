@@ -82,14 +82,12 @@ export default function App() {
   // Get List of users for drawer. Set first user as selected user
   useEffect(() => {
     getAllUsers().then(userInfo => {
-      if (!userInfo) {
-        return;
+      if (userInfo !== null) {
+        // Store users list as a objects, sorted by display name
+        const usersSortedByDisplayName = userInfo.sort(usersCmp);
+        setUsers(usersSortedByDisplayName);
+        setSelectedUser(usersSortedByDisplayName[0]);
       }
-
-      // Store users list as a objects, sorted by display name
-      const usersSortedByDisplayName = userInfo.sort(usersCmp);
-      setUsers(usersSortedByDisplayName);
-      setSelectedUser(usersSortedByDisplayName[0]);
     })
   }, []);
 
@@ -100,7 +98,7 @@ export default function App() {
         handleUserLogin(loggedInUser);
       }
     })
-  }, [])
+  }, [users])
   
   // GET the full list from the API for a particular user
   useEffect(() => {
