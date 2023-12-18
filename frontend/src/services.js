@@ -45,10 +45,11 @@ export async function getUserItemData(user_guid) {
 };
 
 
-export async function sendReorderedItem(changeDelta) {
+export async function sendReorderedItem(changeDelta, user_guid) {
 
   try {
-    const response = await fetch(API_URL + '/reorder', {
+    const response = await fetch(
+      API_URL + '/reorder?' + new URLSearchParams({user_guid: user_guid}), {
       method: 'POST',
       headers: {
         'Accept': 'appplication/json',
@@ -73,10 +74,11 @@ export async function sendReorderedItem(changeDelta) {
 }
 
 
-export async function sendNewItem(changeDelta) {
+export async function sendNewItem(changeDelta, user_guid) {
 
   try {
-    const response = await fetch(API_URL + '/item', {
+    const response = await fetch(
+      API_URL + '/item?' + new URLSearchParams({user_guid: user_guid}), {
       method: 'POST',
       headers: {
         'Accept': 'appplication/json',
@@ -101,10 +103,11 @@ export async function sendNewItem(changeDelta) {
 }
 
 
-export async function sendUpdatedItem(item) {
+export async function sendUpdatedItem(item, user_guid) {
 
   try {
-    const response = await fetch(API_URL + '/item', {
+    const response = await fetch(
+      API_URL + '/item?' + new URLSearchParams({user_guid: user_guid}), {
       method: 'PUT',
       headers: {
         'Accept': 'appplication/json',
@@ -129,10 +132,11 @@ export async function sendUpdatedItem(item) {
 }
 
 
-export async function deleteItem(item) {
+export async function deleteItem(item, user_guid) {
 
   try {
-    const response = await fetch(API_URL + '/item', {
+    const response = await fetch(
+      API_URL + '/item?' + new URLSearchParams({user_guid: user_guid}), {
       method: 'DELETE',
       headers: {
         'Accept': 'appplication/json',

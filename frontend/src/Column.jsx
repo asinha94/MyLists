@@ -133,7 +133,7 @@ function Category({categoryData, searchValue, isDragDisabled, authorized, select
 
     // Send update to backend and hopefully get a response
     const changeDelta = createChangeDelta(destination.index, newItems);
-    sendReorderedItem(changeDelta).then(newItem => {
+    sendReorderedItem(changeDelta, selectedUser.user_guid).then(newItem => {
       // Re-render the old list if there is an error
       // TODO: toast message
       if (newItem === null) {
@@ -165,7 +165,7 @@ function Category({categoryData, searchValue, isDragDisabled, authorized, select
 
     // Send new item to backend
     const changeDelta = createChangeDelta(0, newItems);
-    sendNewItem(changeDelta).then(newItem => {
+    sendNewItem(changeDelta, selectedUser.user_guid).then(newItem => {
       // If the update was successful, re-render with the new item
       if (newItem !== null) {
         newItems[0] = newItem;
@@ -184,7 +184,7 @@ function Category({categoryData, searchValue, isDragDisabled, authorized, select
       items: newItems
     };
 
-    sendUpdatedItem(editedItem).then(newItem => {
+    sendUpdatedItem(editedItem, selectedUser.user_guid).then(newItem => {
       if (newItem !== null) {
         newItems[index] = newItem;
         setData(newData);
@@ -205,7 +205,7 @@ function Category({categoryData, searchValue, isDragDisabled, authorized, select
     };
 
 
-    deleteItem(oldItem).then(removedItem => {
+    deleteItem(oldItem, selectedUser.user_guid).then(removedItem => {
       if (removedItem === true) {
         setData(newData);
       }
