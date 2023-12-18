@@ -20,7 +20,7 @@ const itemListStyle = {
   "minHeight": "100px"
 }
 
-function TitleBar({title, unit, verb, onNewItemSubmit}) {
+function TitleBar({title, unit, verb, onNewItemSubmit, authorized}) {
   const [dialogOpen, setDialogOpen] = React.useState(false);
 
   const titleSyle = {
@@ -43,9 +43,11 @@ function TitleBar({title, unit, verb, onNewItemSubmit}) {
   return (
     <div style={divStyle}>
       <h3 style={titleSyle}>{title}</h3>
-      <IconButton aria-label="Example" onClick={plusOnClick}>
-        <AddIcon />
-      </IconButton>
+      {authorized && 
+        <IconButton aria-label="Example" onClick={plusOnClick}>
+          <AddIcon />
+        </IconButton>
+      }
       <NewItemDialog
         category={title}
         unit={unit}
@@ -59,7 +61,7 @@ function TitleBar({title, unit, verb, onNewItemSubmit}) {
 }
 
 
-function Category({categoryData, searchValue, isDragDisabled}) {
+function Category({categoryData, searchValue, isDragDisabled, authorized, selectedUser}) {
   const [data, setData] = useState(categoryData);
 
   const title = data.title;
@@ -102,7 +104,7 @@ function Category({categoryData, searchValue, isDragDisabled}) {
     }
   };
 
-  const onDragEnd = result => {
+  const onDragEnd = (result) => {
     const {destination, source} = result;
     // Dropped from list
     if (!destination) {
@@ -131,7 +133,7 @@ function Category({categoryData, searchValue, isDragDisabled}) {
 
     // Send update to backend and hopefully get a response
     const changeDelta = createChangeDelta(destination.index, newItems);
-    sendReorderedItem(changeDelta).then(newItem => {
+    sendReorderedItem(changeDelta, selectedUser.user_guid).then(newItem => {
       // Re-render the old list if there is an error
       // TODO: toast message
       if (newItem === null) {
@@ -163,7 +165,7 @@ function Category({categoryData, searchValue, isDragDisabled}) {
 
     // Send new item to backend
     const changeDelta = createChangeDelta(0, newItems);
-    sendNewItem(changeDelta).then(newItem => {
+    sendNewItem(changeDelta, selectedUser.user_guid).then(newItem => {
       // If the update was successful, re-render with the new item
       if (newItem !== null) {
         newItems[0] = newItem;
@@ -182,7 +184,7 @@ function Category({categoryData, searchValue, isDragDisabled}) {
       items: newItems
     };
 
-    sendUpdatedItem(editedItem).then(newItem => {
+    sendUpdatedItem(editedItem, selectedUser.user_guid).then(newItem => {
       if (newItem !== null) {
         newItems[index] = newItem;
         setData(newData);
@@ -203,7 +205,7 @@ function Category({categoryData, searchValue, isDragDisabled}) {
     };
 
 
-    deleteItem(oldItem).then(removedItem => {
+    deleteItem(oldItem, selectedUser.user_guid).then(removedItem => {
       if (removedItem === true) {
         setData(newData);
       }
@@ -219,6 +221,7 @@ function Category({categoryData, searchValue, isDragDisabled}) {
           unit={unit}
           verb={verb}
           onNewItemSubmit={onNewItemSubmit}
+          authorized={authorized}
         />
         <Droppable droppableId={data.id} type={title}>
           {(provided, snaphshot) => {
@@ -242,6 +245,7 @@ function Category({categoryData, searchValue, isDragDisabled}) {
                     isDragDisabled={isDragDisabled}
                     OnItemEditSet={OnItemEditSet}
                     OnItemDeleteConfirm={OnItemDeleteConfirm}
+                    authorized={authorized}
                   />)}
                 {provided.placeholder}
               </div>
@@ -254,7 +258,7 @@ function Category({categoryData, searchValue, isDragDisabled}) {
 }
 
 
-export default function Categories({loadedData, categories, searchValue, isDragDisabled, selectedCategory}) {
+export default function Categories({loadedData, categories, searchValue, isDragDisabled, selectedCategory, authorized, selectedUser}) {
   if (isMobile) {
     if (selectedCategory) {
       const categoryData = loadedData[selectedCategory];
@@ -264,6 +268,8 @@ export default function Categories({loadedData, categories, searchValue, isDragD
           categoryData={categoryData}
           isDragDisabled={isDragDisabled}
           searchValue={searchValue}
+          authorized={authorized}
+          selectedUser={selectedUser}
         />
       )
     }
@@ -281,6 +287,8 @@ export default function Categories({loadedData, categories, searchValue, isDragD
               categoryData={categoryData}
               isDragDisabled={isDragDisabled}
               searchValue={searchValue}
+              authorized={authorized}
+              selectedUser={selectedUser}
             />
           )
           

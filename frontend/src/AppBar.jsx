@@ -159,7 +159,7 @@ function UserSideDrawerItem({user, setSelectedUser, handleDrawerClose}) {
 }
 
   
-export default function SearchAppBar({users, categories, selectedCategory, setSelectedCategory, setSearchValue, selectedUser, setSelectedUser, handleNewUserRegister, handleUserLogin, loggedInUser, handleAddNewCategory}) {
+export default function SearchAppBar({users, categories, selectedCategory, setSelectedCategory, setSearchValue, selectedUser, setSelectedUser, handleNewUserRegister, handleUserLogin, loggedInUser, handleAddNewCategory, authorized}) {
   const [open, setOpen] = useState(false);
   const [newCategoryOpen, SetNewCategoryOpen] = useState(false);
 
@@ -197,17 +197,20 @@ export default function SearchAppBar({users, categories, selectedCategory, setSe
             <MenuIcon />
           </IconButton>
 
-          <IconButton aria-label="Example" onClick={plusOnClick}>
-            <AddIcon />
-          </IconButton>
-          <NewCategoryDialog
-            categories={categories}
-            dialogOpen={newCategoryOpen}
-            setDialogOpen={SetNewCategoryOpen}
-            userGuid={selectedUser.user_guid}
-            onNewCategorySubmit={handleAddNewCategory}
-          />
-          
+          {authorized &&
+            <div>
+              <IconButton aria-label="Example" onClick={plusOnClick}>
+                <AddIcon />
+              </IconButton>
+              <NewCategoryDialog
+                categories={categories}
+                dialogOpen={newCategoryOpen}
+                setDialogOpen={SetNewCategoryOpen}
+                userGuid={selectedUser.user_guid}
+                onNewCategorySubmit={handleAddNewCategory}
+              />
+            </div>}
+
           <Typography
             variant="h6"
             noWrap

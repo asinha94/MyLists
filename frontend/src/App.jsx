@@ -31,8 +31,10 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [searchValue, setSearchValue] = useState('');
 
-  const isDragDisabled = searchValue.length !== 0;
+  const authorized = loggedInUser !== null && loggedInUser.user_guid === selectedUser.user_guid;
+  const isDragDisabled = searchValue.length !== 0 || !authorized;
   const categories = Object.keys(loadedData).sort();
+  
   
   // Update the initially selected category
   if (isMobile && selectedCategory === "" && categories.length > 0) {
@@ -56,7 +58,7 @@ export default function App() {
   };
 
   const handleUserLogin = (user) => {
-    console.log("Logged in as: " + JSON.stringify(user));
+    console.log("Logged in as '" + user.display_name + "'");
     setLoggedInUser(user);
     setSelectedUser(user);
   }
@@ -80,14 +82,12 @@ export default function App() {
   // Get List of users for drawer. Set first user as selected user
   useEffect(() => {
     getAllUsers().then(userInfo => {
-      if (!userInfo) {
-        return;
+      if (userInfo !== null) {
+        // Store users list as a objects, sorted by display name
+        const usersSortedByDisplayName = userInfo.sort(usersCmp);
+        setUsers(usersSortedByDisplayName);
+        setSelectedUser(usersSortedByDisplayName[0]);
       }
-
-      // Store users list as a objects, sorted by display name
-      const usersSortedByDisplayName = userInfo.sort(usersCmp);
-      setUsers(usersSortedByDisplayName);
-      setSelectedUser(usersSortedByDisplayName[0]);
     })
   }, []);
 
@@ -98,7 +98,7 @@ export default function App() {
         handleUserLogin(loggedInUser);
       }
     })
-  }, [])
+  }, [users])
   
   // GET the full list from the API for a particular user
   useEffect(() => {
@@ -129,6 +129,7 @@ export default function App() {
         handleUserLogin={handleUserLogin}
         loggedInUser={loggedInUser}
         handleAddNewCategory={handleAddNewCategory}
+        authorized={authorized}
         />
       <Categories
         loadedData={loadedData}
@@ -136,6 +137,8 @@ export default function App() {
         searchValue={searchValue}
         isDragDisabled={isDragDisabled}
         selectedCategory={selectedCategory}
+        authorized={authorized}
+        selectedUser={selectedUser}
       />
     </ThemeProvider> 
   )

@@ -51,7 +51,7 @@ function ItemIcons({index, title, handleCloseState, OnItemEditSet, OnItemDeleteC
 }
 
 
-function ItemContainer({index, item, provided, snaphshot, isDragDisabled, OnItemEditSet, OnItemDeleteConfirm}) {
+function ItemContainer({index, item, provided, snaphshot, isDragDisabled, OnItemEditSet, OnItemDeleteConfirm, authorized}) {
   const [isHovering, setIsHovering] = useState(false);
   const draggableProps = provided.draggableProps;
   const dragHandleProps = provided.dragHandleProps;
@@ -88,7 +88,7 @@ function ItemContainer({index, item, provided, snaphshot, isDragDisabled, OnItem
       <div>
         {index+1 + '.' + item.content}
       </div>
-      {isHovering && 
+      {isHovering && authorized &&
         <ItemIcons
           index={index}
           title={item.content}
@@ -101,7 +101,7 @@ function ItemContainer({index, item, provided, snaphshot, isDragDisabled, OnItem
   );
 }
 
-export default function ItemDraggable({item, index, title, isDragDisabled, OnItemEditSet, OnItemDeleteConfirm}) {
+export default function ItemDraggable({item, index, title, isDragDisabled, OnItemEditSet, OnItemDeleteConfirm, authorized}) {
     return (
       <Draggable draggableId={item.id} index={index} type={title} isDragDisabled={isDragDisabled}>
         {(provided, snaphshot) => (
@@ -113,6 +113,7 @@ export default function ItemDraggable({item, index, title, isDragDisabled, OnIte
             isDragDisabled={isDragDisabled}
             OnItemEditSet={OnItemEditSet}
             OnItemDeleteConfirm={OnItemDeleteConfirm}
+            authorized={authorized}
           />
         )}
       </Draggable>

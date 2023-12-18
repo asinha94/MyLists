@@ -62,14 +62,13 @@ pub struct UIDisplayUser {
 }
 
 #[derive(Deserialize)]
-pub struct UIGetItemUser {
+pub struct UIUser {
     pub user_guid: String,
 }
 
 
 #[derive(Deserialize, Serialize)]
 pub struct UINewCategory {
-    pub user_guid: String,
     pub category_title: String,
     pub category_unit: String,
     pub category_verb: String,

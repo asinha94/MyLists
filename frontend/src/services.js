@@ -25,10 +25,10 @@ export async function getAllUsers() {
 };
 
 // TODO: Toast message on failure
-export async function getUserItemData(userGuid) {  
+export async function getUserItemData(user_guid) {  
   try {
     const response = await fetch(
-      API_URL + '/items?' + new URLSearchParams({user_guid: userGuid})
+      API_URL + '/items?' + new URLSearchParams({user_guid: user_guid})
     );
 
     if (!response.ok) {
@@ -45,10 +45,11 @@ export async function getUserItemData(userGuid) {
 };
 
 
-export async function sendReorderedItem(changeDelta) {
+export async function sendReorderedItem(changeDelta, user_guid) {
 
   try {
-    const response = await fetch(API_URL + '/reorder', {
+    const response = await fetch(
+      API_URL + '/reorder?' + new URLSearchParams({user_guid: user_guid}), {
       method: 'POST',
       headers: {
         'Accept': 'appplication/json',
@@ -73,16 +74,18 @@ export async function sendReorderedItem(changeDelta) {
 }
 
 
-export async function sendNewItem(changeDelta) {
+export async function sendNewItem(changeDelta, user_guid) {
 
   try {
-    const response = await fetch(API_URL + '/item', {
-      method: 'POST',
-      headers: {
-        'Accept': 'appplication/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(changeDelta)
+    const response = await fetch(
+      API_URL + '/item?' + new URLSearchParams({user_guid: user_guid}), {
+        credentials: 'include',
+        method: 'POST',
+        headers: {
+          'Accept': 'appplication/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(changeDelta)
       }
     );
 
@@ -101,16 +104,18 @@ export async function sendNewItem(changeDelta) {
 }
 
 
-export async function sendUpdatedItem(item) {
+export async function sendUpdatedItem(item, user_guid) {
 
   try {
-    const response = await fetch(API_URL + '/item', {
-      method: 'PUT',
-      headers: {
-        'Accept': 'appplication/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(item)
+    const response = await fetch(
+      API_URL + '/item?' + new URLSearchParams({user_guid: user_guid}), {
+        credentials: 'include',
+        method: 'PUT',
+        headers: {
+          'Accept': 'appplication/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(item)
       }
     );
 
@@ -129,16 +134,18 @@ export async function sendUpdatedItem(item) {
 }
 
 
-export async function deleteItem(item) {
+export async function deleteItem(item, user_guid) {
 
   try {
-    const response = await fetch(API_URL + '/item', {
-      method: 'DELETE',
-      headers: {
-        'Accept': 'appplication/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(item)
+    const response = await fetch(
+      API_URL + '/item?' + new URLSearchParams({user_guid: user_guid}), {
+        credentials: 'include',
+        method: 'DELETE',
+        headers: {
+          'Accept': 'appplication/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(item)
       }
     );
 
@@ -160,6 +167,7 @@ export async function registerUser(displayname, username, password, malformedPas
   const credentials = {displayname: displayname, username: username, password: password}
   try {
     const response = await fetch(API_URL + '/register', {
+      credentials: 'include',
       method: 'POST',
       headers: {
         'Accept': 'appplication/json',
@@ -220,7 +228,7 @@ export async function loginUser(username, password) {
   try {
     const response = await fetch(API_URL + '/login', {
       method: 'POST',
-      'credentials': 'include',
+      credentials: 'include',
       headers: {
         'Accept': 'appplication/json',
         'Content-Type': 'application/json'
@@ -276,12 +284,12 @@ export async function loginUserOnStartup() {
 
     // Logged out
     else if (response.status === 412) {
-      const output = await response.json();
+      const output = await response.body;
       console.log(response.status + " " + response.statusText + ": Recieved error while trying to register user. " + output);
     }
 
     else if (response.status === 401) {
-      console.log("Unauthorized login");
+      // Expected
     }
     
     // Unexpected Error
@@ -307,9 +315,10 @@ export async function addNewCategory(user_guid, category_title, category_unit, c
   }
   
   try {
-    const response = await fetch(API_URL + '/category', {
+    const response = await fetch(
+      API_URL + '/category?' + new URLSearchParams({user_guid: user_guid}), {
       method: 'POST',
-      'credentials': 'include',
+      credentials: 'include',
       headers: {
         'Accept': 'appplication/json',
         'Content-Type': 'application/json'
