@@ -79,12 +79,13 @@ export async function sendNewItem(changeDelta, user_guid) {
   try {
     const response = await fetch(
       API_URL + '/item?' + new URLSearchParams({user_guid: user_guid}), {
-      method: 'POST',
-      headers: {
-        'Accept': 'appplication/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(changeDelta)
+        credentials: 'include',
+        method: 'POST',
+        headers: {
+          'Accept': 'appplication/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(changeDelta)
       }
     );
 
@@ -108,12 +109,13 @@ export async function sendUpdatedItem(item, user_guid) {
   try {
     const response = await fetch(
       API_URL + '/item?' + new URLSearchParams({user_guid: user_guid}), {
-      method: 'PUT',
-      headers: {
-        'Accept': 'appplication/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(item)
+        credentials: 'include',
+        method: 'PUT',
+        headers: {
+          'Accept': 'appplication/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(item)
       }
     );
 
@@ -137,12 +139,13 @@ export async function deleteItem(item, user_guid) {
   try {
     const response = await fetch(
       API_URL + '/item?' + new URLSearchParams({user_guid: user_guid}), {
-      method: 'DELETE',
-      headers: {
-        'Accept': 'appplication/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(item)
+        credentials: 'include',
+        method: 'DELETE',
+        headers: {
+          'Accept': 'appplication/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(item)
       }
     );
 
@@ -164,6 +167,7 @@ export async function registerUser(displayname, username, password, malformedPas
   const credentials = {displayname: displayname, username: username, password: password}
   try {
     const response = await fetch(API_URL + '/register', {
+      credentials: 'include',
       method: 'POST',
       headers: {
         'Accept': 'appplication/json',
@@ -224,7 +228,7 @@ export async function loginUser(username, password) {
   try {
     const response = await fetch(API_URL + '/login', {
       method: 'POST',
-      'credentials': 'include',
+      credentials: 'include',
       headers: {
         'Accept': 'appplication/json',
         'Content-Type': 'application/json'
@@ -314,7 +318,7 @@ export async function addNewCategory(user_guid, category_title, category_unit, c
     const response = await fetch(
       API_URL + '/category?' + new URLSearchParams({user_guid: user_guid}), {
       method: 'POST',
-      'credentials': 'include',
+      credentials: 'include',
       headers: {
         'Accept': 'appplication/json',
         'Content-Type': 'application/json'
