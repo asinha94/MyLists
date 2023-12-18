@@ -21,6 +21,47 @@ const HOST: &str = "0.0.0.0";
 const PORT: u16 = 8000;
 
 
+#[get("/api/autologin")]
+async fn autologin(state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
+
+    // Get cookie if available
+    let cookie = match session.get::<String>("authToken") {
+        Err(e) => {
+            println!("Unexpected error when checking session storage: {e}");
+            return HttpResponse::InternalServerError()
+                .body(format!("Cookie Session failure: {e}"));
+        },
+
+        Ok(cookie) => cookie
+    };
+
+    if cookie.is_none() {
+        return HttpResponse::Unauthorized().finish();
+    }
+
+    // Check session cache for cookie
+    let auth_token = cookie.unwrap();
+    let app_data = state_data.app_data.lock().unwrap();
+    let username = app_data.username_by_token.get(&auth_token);
+
+    match username {
+        // User has an authentication token somehow, but we don't know about it (might have expired)
+        None => return HttpResponse::PreconditionFailed().body(format!("Logged out of previous session!")),
+        Some(u) => match app_data.user_by_username.get(u) {
+            None => return HttpResponse::Unauthorized().finish(),
+            Some(uc) => {
+                let ui_user = api::UIDisplayUser {
+                    user_guid: uc.user_guid.clone(),
+                    display_name: uc.display_name.clone()
+                };
+                HttpResponse::Ok().body(serde_json::to_string(&ui_user).unwrap())
+            }
+        }
+    }
+    
+}
+
+
 #[post("/api/category")]
 async fn add_category(body: web::Json<api::UINewCategory>, state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
     
@@ -268,47 +309,6 @@ async fn get_all_users() -> impl Responder {
 }
 
 
-
-/*
-#[post("/api/autologin")]
-async fn autologin(state_data: web::Data<app::AppState>, session: Session) -> impl Responder {
-
-    // Get cookie if available
-    let cookie = match session.get::<String>("authToken") {
-        Err(e) => {
-            println!("Unexpected error when checking session storage: {e}");
-            return HttpResponse::InternalServerError()
-                .body(format!("Cookie Session failure: {e}"));
-        },
-
-        Ok(cookie) => cookie
-    };
-
-    if cookie.is_none() {
-        return HttpResponse::Unauthorized().finish();
-    }
-
-    // Check session cache for cookie
-    let auth_token = cookie.unwrap();
-    let app_data = state_data.app_data.lock().unwrap();
-    let username = app_data.username_by_token.get(&auth_token);
-    
-    // User has an authentication token somehow, but we don't know about it (might have expired)
-    // Tell them to re-login
-    if username.is_none() {
-        return HttpResponse::Unauthorized()
-            .body(format!("Logged out of previous session!"));
-    }
-
-    //let user_data = app_data.user_by_username.get(&username);
-
-    HttpResponse::Ok().finish()
-
-
-}
-*/
-
-
 fn session_middleware(is_prod: bool, cookie_secret_key: String) -> SessionMiddleware<CookieSessionStore> {
     let cookie_secret_key_decoded = general_purpose::STANDARD.decode(cookie_secret_key).unwrap();
     let key = Key::from(&cookie_secret_key_decoded);
@@ -359,6 +359,7 @@ async fn main() -> std::io::Result<()>{
     HttpServer::new(move|| {
         App::new()
         .app_data(shared_data.clone())
+        .service(autologin)
         .service(add_category)
         .service(get_all_items)
         .service(get_all_users)
