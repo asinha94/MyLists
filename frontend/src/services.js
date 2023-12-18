@@ -264,39 +264,36 @@ export async function loginUser(username, password) {
 export async function loginUserOnStartup() {
   try {
     const response = await fetch(API_URL + '/autologin', {
-      method: 'POST',
+      method: 'GET',
       'credentials': 'include'
       }
     );
 
-    const registerUpdateData = {
-      authorized: false,
-      authorizedUsername: null,
-      authFailReason: null,
-      authUser: null
+    if (response.ok) {
+      const loggedInUser = await response.json();
+      return loggedInUser;
     }
 
-    if (response.ok) {
-      const newUser = await response.json();
-      registerUpdateData.authorized = true;
-      registerUpdateData.authUser = newUser;
+    // Logged out
+    else if (response.status === 412) {
+      const output = await response.json();
+      console.log(response.status + " " + response.statusText + ": Recieved error while trying to register user. " + output);
+    }
+
+    else if (response.status === 401) {
+      console.log("Unauthorized login");
     }
     
-    // 401 Generic unauthorized failure message
+    // Unexpected Error
     else {
-      // Unexpected Error
-      if (response.status !== 401) {
-        console.log("Recieved error while trying to register user: " + response.status + " " + response.statusText);
-      }
-      registerUpdateData.authFailReason = 'Failed to validate credentials';
+      console.log("Recieved error while trying to register user: " + response.status + " " + response.statusText);
     }
-
-    return registerUpdateData;
 
   } catch(err) {
     console.log(err.message);
-    return null;
   }
+
+  return null;
 }
 
 

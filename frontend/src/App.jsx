@@ -7,7 +7,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import {isMobile} from 'react-device-detect';
 // The App
 import Categories from './Column'
-import { getUserItemData, getAllUsers } from './services';
+import { getUserItemData, getAllUsers, loginUserOnStartup } from './services';
 import SearchAppBar from './AppBar';
 
 
@@ -56,6 +56,7 @@ export default function App() {
   };
 
   const handleUserLogin = (user) => {
+    console.log("Logged in as: " + JSON.stringify(user));
     setLoggedInUser(user);
     setSelectedUser(user);
   }
@@ -89,6 +90,15 @@ export default function App() {
       setSelectedUser(usersSortedByDisplayName[0]);
     })
   }, []);
+
+  // Check if user is logged in already
+  useEffect(() => {
+    loginUserOnStartup().then(loggedInUser => {
+      if (loggedInUser !== null) {
+        handleUserLogin(loggedInUser);
+      }
+    })
+  }, [])
   
   // GET the full list from the API for a particular user
   useEffect(() => {
