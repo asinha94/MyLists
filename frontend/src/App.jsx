@@ -58,7 +58,7 @@ export default function App() {
   };
 
   const handleUserLogin = (user) => {
-    console.log("Logged in as: " + JSON.stringify(user));
+    console.log("Logged in as '" + user.display_name + "'");
     setLoggedInUser(user);
     setSelectedUser(user);
   }
@@ -140,6 +140,7 @@ export default function App() {
         isDragDisabled={isDragDisabled}
         selectedCategory={selectedCategory}
         authorized={authorized}
+        selectedUser={selectedUser}
       />
     </ThemeProvider> 
   )

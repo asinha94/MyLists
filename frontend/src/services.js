@@ -25,10 +25,10 @@ export async function getAllUsers() {
 };
 
 // TODO: Toast message on failure
-export async function getUserItemData(userGuid) {  
+export async function getUserItemData(user_guid) {  
   try {
     const response = await fetch(
-      API_URL + '/items?' + new URLSearchParams({user_guid: userGuid})
+      API_URL + '/items?' + new URLSearchParams({user_guid: user_guid})
     );
 
     if (!response.ok) {
@@ -307,7 +307,8 @@ export async function addNewCategory(user_guid, category_title, category_unit, c
   }
   
   try {
-    const response = await fetch(API_URL + '/category', {
+    const response = await fetch(
+      API_URL + '/category?' + new URLSearchParams({user_guid: user_guid}), {
       method: 'POST',
       'credentials': 'include',
       headers: {

@@ -61,7 +61,7 @@ function TitleBar({title, unit, verb, onNewItemSubmit, authorized}) {
 }
 
 
-function Category({categoryData, searchValue, isDragDisabled, authorized}) {
+function Category({categoryData, searchValue, isDragDisabled, authorized, selectedUser}) {
   const [data, setData] = useState(categoryData);
 
   const title = data.title;
@@ -258,7 +258,7 @@ function Category({categoryData, searchValue, isDragDisabled, authorized}) {
 }
 
 
-export default function Categories({loadedData, categories, searchValue, isDragDisabled, selectedCategory, authorized}) {
+export default function Categories({loadedData, categories, searchValue, isDragDisabled, selectedCategory, authorized, selectedUser}) {
   if (isMobile) {
     if (selectedCategory) {
       const categoryData = loadedData[selectedCategory];
@@ -269,6 +269,7 @@ export default function Categories({loadedData, categories, searchValue, isDragD
           isDragDisabled={isDragDisabled}
           searchValue={searchValue}
           authorized={authorized}
+          selectedUser={selectedUser}
         />
       )
     }
@@ -287,6 +288,7 @@ export default function Categories({loadedData, categories, searchValue, isDragD
               isDragDisabled={isDragDisabled}
               searchValue={searchValue}
               authorized={authorized}
+              selectedUser={selectedUser}
             />
           )
           
